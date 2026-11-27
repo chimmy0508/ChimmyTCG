@@ -1,0 +1,3375 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TheChimmyTCG — Twitch Card Collector Extension</title>
+  <!-- Mandatory Twitch Extension Helper SDK -->
+  <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
+  <!-- Google Fonts (Allowed by Twitch CSP) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================================================
+       SELF-CONTAINED TWITCH-CSP-COMPLIANT STYLESHEET (NO EXTERNAL CDN SCRIPTS)
+       ========================================================================= */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --twitch-purple: #9146FF;
+      --twitch-accent: #A970FF;
+      --twitch-dark: #0E0E10;
+      --twitch-panel: #18181B;
+      --twitch-elevated: #1F1F23;
+      --twitch-border: #2F2F35;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--twitch-dark);
+      color: #F3F4F6;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.4;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0E0E10; }
+    ::-webkit-scrollbar-thumb { background: #2F2F35; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #9146FF; }
+
+    /* Display & Layout Utilities */
+    .hidden { display: none !important; }
+    .flex { display: flex; }
+    .inline-flex { display: inline-flex; }
+    .inline-block { display: inline-block; }
+    .block { display: block; }
+    .grid { display: grid; }
+    .flex-col { flex-direction: column; }
+    .flex-row { flex-direction: row; }
+    .flex-wrap { flex-wrap: wrap; }
+    .flex-1 { flex: 1 1 0%; }
+    .flex-shrink-0 { flex-shrink: 0; }
+    .items-center { align-items: center; }
+    .items-start { align-items: flex-start; }
+    .justify-between { justify-content: space-between; }
+    .justify-center { justify-content: center; }
+    .justify-end { justify-content: flex-end; }
+    .self-start { align-self: flex-start; }
+
+    .relative { position: relative; }
+    .absolute { position: absolute; }
+    .fixed { position: fixed; }
+    .sticky { position: sticky; }
+    .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+    .top-0 { top: 0; }
+    .top-3 { top: 0.75rem; }
+    .top-4 { top: 1rem; }
+    .right-3 { right: 0.75rem; }
+    .right-4 { right: 1rem; }
+    .bottom-3 { bottom: 0.75rem; }
+    .bottom-4 { bottom: 1rem; }
+    .left-3 { left: 0.75rem; }
+    .z-10 { z-index: 10; }
+    .z-20 { z-index: 20; }
+    .z-30 { z-index: 30; }
+    .z-40 { z-index: 40; }
+    .z-50 { z-index: 50; }
+
+    /* Sizing & Spacing */
+    .w-full { width: 100%; }
+    .h-full { height: 100%; }
+    .w-2 { width: 0.5rem; }
+    .h-2 { height: 0.5rem; }
+    .w-4 { width: 1rem; }
+    .h-7 { height: 1.75rem; }
+    .w-6 { width: 1.5rem; }
+    .h-6 { height: 1.5rem; }
+    .w-8 { width: 2rem; }
+    .h-8 { height: 2rem; }
+    .w-9 { width: 2.25rem; }
+    .h-9 { height: 2.25rem; }
+    .w-10 { width: 2.5rem; }
+    .h-10 { height: 2.5rem; }
+    .w-11 { width: 2.75rem; }
+    .h-11 { height: 2.75rem; }
+    .w-12 { width: 3rem; }
+    .h-12 { height: 3rem; }
+    .w-14 { width: 3.5rem; }
+    .w-16 { width: 4rem; }
+    .h-16 { height: 4rem; }
+    .w-20 { width: 5rem; }
+    .h-20 { height: 5rem; }
+    .w-28 { width: 7rem; }
+    .w-44 { width: 11rem; }
+    .w-48 { width: 12rem; }
+    .w-52 { width: 13rem; }
+    .w-56 { width: 14rem; }
+    .w-64 { width: 16rem; }
+    .h-1 { height: 0.25rem; }
+    .h-1\.5 { height: 0.375rem; }
+    .h-28 { height: 7rem; }
+    .h-36 { height: 9rem; }
+    .h-64 { height: 16rem; }
+    .h-72 { height: 18rem; }
+    .h-80 { height: 20rem; }
+    .min-w-0 { min-width: 0; }
+    .min-h-\[2rem\] { min-height: 2rem; }
+    .max-w-xs { max-width: 20rem; }
+    .max-w-sm { max-width: 24rem; }
+    .max-w-md { max-width: 28rem; }
+    .max-w-2xl { max-width: 42rem; }
+    .max-w-4xl { max-width: 56rem; }
+    .max-w-5xl { max-width: 64rem; }
+    .max-w-7xl { max-width: 80rem; }
+    .max-h-\[62vh\] { max-height: 62vh; }
+    .max-h-\[85vh\] { max-height: 85vh; }
+    .max-h-\[92vh\] { max-height: 92vh; }
+    .max-h-\[640px\] { max-height: 640px; }
+    .max-h-28 { max-height: 7rem; }
+    .aspect-\[3\/4\] { aspect-ratio: 3 / 4; }
+    .aspect-video { aspect-ratio: 16 / 9; }
+
+    .mx-auto { margin-left: auto; margin-right: auto; }
+    .my-auto { margin-top: auto; margin-bottom: auto; }
+    .my-1 { margin-top: 0.25rem; margin-bottom: 0.25rem; }
+    .my-1\.5 { margin-top: 0.375rem; margin-bottom: 0.375rem; }
+    .my-2 { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+    .my-3 { margin-top: 0.75rem; margin-bottom: 0.75rem; }
+    .my-4 { margin-top: 1rem; margin-bottom: 1rem; }
+    .mt-0\.5 { margin-top: 0.125rem; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-1\.5 { margin-top: 0.375rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-2\.5 { margin-top: 0.625rem; }
+    .mt-3 { margin-top: 0.75rem; }
+    .mt-4 { margin-top: 1rem; }
+    .mt-6 { margin-top: 1.5rem; }
+    .mt-7 { margin-top: 1.75rem; }
+    .mb-0\.5 { margin-bottom: 0.125rem; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-1\.5 { margin-bottom: 0.375rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-2\.5 { margin-bottom: 0.625rem; }
+    .mb-3 { margin-bottom: 0.75rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-5 { margin-bottom: 1.25rem; }
+    .ml-1 { margin-left: 0.25rem; }
+    .mr-1 { margin-right: 0.25rem; }
+    .mr-1\.5 { margin-right: 0.375rem; }
+    .mr-4 { margin-right: 1rem; }
+
+    .p-0\.5 { padding: 0.125rem; }
+    .p-1 { padding: 0.25rem; }
+    .p-1\.5 { padding: 0.375rem; }
+    .p-2 { padding: 0.5rem; }
+    .p-2\.5 { padding: 0.625rem; }
+    .p-3 { padding: 0.75rem; }
+    .p-3\.5 { padding: 0.875rem; }
+    .p-4 { padding: 1rem; }
+    .p-5 { padding: 1.25rem; }
+    .p-6 { padding: 1.5rem; }
+    .px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
+    .px-1\.5 { padding-left: 0.375rem; padding-right: 0.375rem; }
+    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .px-3\.5 { padding-left: 0.875rem; padding-right: 0.875rem; }
+    .px-4 { padding-left: 1rem; padding-right: 1rem; }
+    .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+    .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+    .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+    .py-5 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+    .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+    .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+    .py-12 { padding-top: 3rem; padding-bottom: 3rem; }
+    .pt-1 { padding-top: 0.25rem; }
+    .pt-2\.5 { padding-top: 0.625rem; }
+    .pt-3 { padding-top: 0.75rem; }
+    .pb-1 { padding-bottom: 0.25rem; }
+    .pb-2 { padding-bottom: 0.5rem; }
+    .pb-2\.5 { padding-bottom: 0.625rem; }
+    .pb-3 { padding-bottom: 0.75rem; }
+    .pb-4 { padding-bottom: 1rem; }
+    .pr-1 { padding-right: 0.25rem; }
+    .pr-4 { padding-right: 1rem; }
+
+    .gap-1 { gap: 0.25rem; }
+    .gap-1\.5 { gap: 0.375rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-2\.5 { gap: 0.625rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-4 { gap: 1rem; }
+    .gap-5 { gap: 1.25rem; }
+    .gap-6 { gap: 1.5rem; }
+
+    .space-y-1 > * + * { margin-top: 0.25rem; }
+    .space-y-1\.5 > * + * { margin-top: 0.375rem; }
+    .space-y-2 > * + * { margin-top: 0.5rem; }
+    .space-y-2\.5 > * + * { margin-top: 0.625rem; }
+    .space-y-3 > * + * { margin-top: 0.75rem; }
+    .space-y-4 > * + * { margin-top: 1rem; }
+
+    /* Grid Templates */
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .col-span-full { grid-column: 1 / -1; }
+
+    @media (min-width: 640px) {
+      .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .sm\:col-span-2 { grid-column: span 2 / span 2; }
+      .sm\:flex { display: flex; }
+      .sm\:inline { display: inline; }
+      .sm\:flex-row { flex-direction: row; }
+      .sm\:px-4 { padding-left: 1rem; padding-right: 1rem; }
+      .sm\:px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
+      .sm\:px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .sm\:p-5 { padding: 1.25rem; }
+      .sm\:p-6 { padding: 1.5rem; }
+      .sm\:gap-3 { gap: 0.75rem; }
+      .sm\:gap-4 { gap: 1rem; }
+      .sm\:gap-6 { gap: 1.5rem; }
+      .sm\:w-44 { width: 11rem; }
+      .sm\:w-52 { width: 13rem; }
+      .sm\:w-64 { width: 16rem; }
+      .sm\:h-72 { height: 18rem; }
+      .sm\:text-sm { font-size: 0.875rem; }
+      .sm\:text-base { font-size: 1rem; }
+      .sm\:text-lg { font-size: 1.125rem; }
+      .sm\:text-2xl { font-size: 1.5rem; }
+      .sm\:text-5xl { font-size: 3rem; }
+      .sm\:text-6xl { font-size: 3.75rem; }
+    }
+
+    @media (min-width: 768px) {
+      .md\:inline { display: inline; }
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (min-width: 1024px) {
+      .lg\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+      .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .lg\:col-span-3 { grid-column: span 3 / span 3; }
+      .lg\:col-span-4 { grid-column: span 4 / span 4; }
+      .lg\:col-span-5 { grid-column: span 5 / span 5; }
+      .lg\:col-span-7 { grid-column: span 7 / span 7; }
+      .lg\:col-span-8 { grid-column: span 8 / span 8; }
+      .lg\:col-span-9 { grid-column: span 9 / span 9; }
+      .lg\:h-auto { height: auto; }
+    }
+
+    /* Typography */
+    .font-display { font-family: 'Cinzel', Georgia, serif; }
+    .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .font-extrabold { font-weight: 800; }
+    .font-black { font-weight: 900; }
+
+    .text-\[8px\] { font-size: 8px; }
+    .text-\[9px\] { font-size: 9px; }
+    .text-\[10px\] { font-size: 10px; }
+    .text-\[11px\] { font-size: 11px; }
+    .text-xs { font-size: 0.75rem; }
+    .text-sm { font-size: 0.875rem; }
+    .text-base { font-size: 1rem; }
+    .text-lg { font-size: 1.125rem; }
+    .text-xl { font-size: 1.25rem; }
+    .text-2xl { font-size: 1.5rem; }
+    .text-3xl { font-size: 1.875rem; }
+    .text-4xl { font-size: 2.25rem; }
+    .text-5xl { font-size: 3rem; }
+    .text-7xl { font-size: 4.5rem; }
+
+    .uppercase { text-transform: uppercase; }
+    .italic { font-style: italic; }
+    .text-left { text-align: left; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .leading-tight { line-height: 1.25; }
+    .leading-snug { line-height: 1.375; }
+    .leading-relaxed { line-height: 1.625; }
+    .tracking-tight { letter-spacing: -0.025em; }
+    .tracking-wide { letter-spacing: 0.025em; }
+    .tracking-wider { letter-spacing: 0.05em; }
+    .tracking-widest { letter-spacing: 0.1em; }
+    .whitespace-nowrap { white-space: nowrap; }
+    .underline { text-decoration: underline; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    /* Colors */
+    .text-white { color: #FFFFFF; }
+    .text-gray-100 { color: #F3F4F6; }
+    .text-gray-200 { color: #E5E7EB; }
+    .text-gray-300 { color: #D1D5DB; }
+    .text-gray-400 { color: #9CA3AF; }
+    .text-gray-500 { color: #6B7280; }
+    .text-gray-600 { color: #4B5563; }
+    .text-gray-700 { color: #374151; }
+    .text-twitch-dark { color: #0E0E10; }
+    .text-twitch-purple { color: #9146FF; }
+    .text-twitch-accent { color: #A970FF; }
+    .text-purple-200 { color: #E9D5FF; }
+    .text-purple-300 { color: #D8B4FE; }
+    .text-amber-200 { color: #FDE68A; }
+    .text-amber-300 { color: #FCD34D; }
+    .text-amber-400 { color: #FBBF24; }
+    .text-cyan-200 { color: #A5F3FC; }
+    .text-cyan-300 { color: #67E8F9; }
+    .text-cyan-400 { color: #22D3EE; }
+    .text-emerald-100 { color: #D1FAE5; }
+    .text-emerald-200 { color: #A7F3D0; }
+    .text-emerald-300 { color: #6EE7B7; }
+    .text-emerald-400 { color: #34D399; }
+    .text-rose-100 { color: #FFE4E6; }
+    .text-rose-300 { color: #FDA4AF; }
+    .text-rose-400 { color: #FB7185; }
+    .text-pink-400 { color: #F472B6; }
+
+    /* Backgrounds & Gradients */
+    .bg-transparent { background-color: transparent; }
+    .bg-twitch-dark { background-color: #0E0E10; }
+    .bg-twitch-panel { background-color: #18181B; }
+    .bg-twitch-elevated { background-color: #1F1F23; }
+    .bg-twitch-purple { background-color: #9146FF; }
+    .bg-twitch-purple\/15 { background-color: rgba(145, 70, 255, 0.15); }
+    .bg-twitch-purple\/20 { background-color: rgba(145, 70, 255, 0.20); }
+    .bg-twitch-purple\/25 { background-color: rgba(145, 70, 255, 0.25); }
+    .bg-twitch-panel\/95 { background-color: rgba(24, 24, 27, 0.95); }
+    .bg-twitch-dark\/60 { background-color: rgba(14, 14, 16, 0.60); }
+    .bg-twitch-dark\/70 { background-color: rgba(14, 14, 16, 0.70); }
+    .bg-twitch-dark\/80 { background-color: rgba(14, 14, 16, 0.80); }
+    .bg-twitch-dark\/90 { background-color: rgba(14, 14, 16, 0.90); }
+    .bg-\[\#131316\] { background-color: #131316; }
+    .bg-\[\#07070a\]\/95 { background-color: rgba(7, 7, 10, 0.95); }
+    .bg-black\/25 { background-color: rgba(0, 0, 0, 0.25); }
+    .bg-black\/30 { background-color: rgba(0, 0, 0, 0.30); }
+    .bg-black\/40 { background-color: rgba(0, 0, 0, 0.40); }
+    .bg-black\/45 { background-color: rgba(0, 0, 0, 0.45); }
+    .bg-black\/50 { background-color: rgba(0, 0, 0, 0.50); }
+    .bg-black\/60 { background-color: rgba(0, 0, 0, 0.60); }
+    .bg-black\/70 { background-color: rgba(0, 0, 0, 0.70); }
+    .bg-black\/75 { background-color: rgba(0, 0, 0, 0.75); }
+    .bg-black\/80 { background-color: rgba(0, 0, 0, 0.80); }
+    .bg-black\/85 { background-color: rgba(0, 0, 0, 0.85); }
+    .bg-white { background-color: #FFFFFF; }
+    .bg-white\/5 { background-color: rgba(255, 255, 255, 0.05); }
+    .bg-white\/10 { background-color: rgba(255, 255, 255, 0.10); }
+    .bg-gray-700 { background-color: #374151; }
+    .bg-gray-900 { background-color: #111827; }
+    .bg-emerald-400 { background-color: #34D399; }
+    .bg-emerald-500 { background-color: #10B981; }
+    .bg-emerald-950\/60 { background-color: rgba(2, 44, 34, 0.60); }
+    .bg-emerald-950\/90 { background-color: rgba(2, 44, 34, 0.90); }
+    .bg-cyan-600\/25 { background-color: rgba(8, 145, 178, 0.25); }
+    .bg-cyan-950\/50 { background-color: rgba(8, 51, 68, 0.50); }
+    .bg-cyan-950\/90 { background-color: rgba(8, 51, 68, 0.90); }
+    .bg-amber-500\/15 { background-color: rgba(245, 158, 11, 0.15); }
+    .bg-amber-500\/20 { background-color: rgba(245, 158, 11, 0.20); }
+    .bg-amber-950\/90 { background-color: rgba(69, 26, 3, 0.90); }
+    .bg-rose-600 { background-color: #E11D48; }
+    .bg-rose-600\/20 { background-color: rgba(225, 29, 72, 0.20); }
+    .bg-rose-950\/40 { background-color: rgba(76, 5, 25, 0.40); }
+    .bg-rose-950\/50 { background-color: rgba(76, 5, 25, 0.50); }
+    .bg-rose-950\/60 { background-color: rgba(76, 5, 25, 0.60); }
+    .bg-rose-950\/90 { background-color: rgba(76, 5, 25, 0.90); }
+    .bg-pink-500\/15 { background-color: rgba(236, 72, 153, 0.15); }
+
+    .bg-gradient-to-b { background-image: linear-gradient(to bottom, var(--tw-grad-from, #18181B), var(--tw-grad-to, #0E0E10)); }
+    .bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-grad-from, #9146FF), var(--tw-grad-to, #4F46E5)); }
+    .bg-gradient-to-tr { background-image: linear-gradient(to top right, var(--tw-grad-from, #9146FF), var(--tw-grad-to, #EC4899)); }
+    .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-grad-from, #9146FF), var(--tw-grad-to, #4F46E5)); }
+
+    .from-twitch-purple { --tw-grad-from: #9146FF; }
+    .to-indigo-600 { --tw-grad-to: #4F46E5; }
+    .to-pink-500 { --tw-grad-to: #EC4899; }
+    .to-pink-600 { --tw-grad-to: #DB2777; }
+    .to-emerald-400 { --tw-grad-to: #34D399; }
+    .from-twitch-dark { --tw-grad-from: #0E0E10; }
+    .to-twitch-elevated { --tw-grad-to: #1F1F23; }
+    .from-amber-500 { --tw-grad-from: #F59E0B; }
+    .to-orange-500 { --tw-grad-to: #F97316; }
+    .to-orange-600 { --tw-grad-to: #EA580C; }
+    .from-emerald-600 { --tw-grad-from: #059669; }
+    .to-teal-600 { --tw-grad-to: #0D9488; }
+    .from-cyan-500 { --tw-grad-from: #06B6D4; }
+    .to-teal-500 { --tw-grad-to: #14B8A6; }
+    .from-slate-700 { --tw-grad-from: #334155; }
+    .to-slate-900 { --tw-grad-to: #0F172A; }
+    .from-blue-700 { --tw-grad-from: #1D4ED8; }
+    .to-slate-950 { --tw-grad-to: #020617; }
+    .from-purple-700 { --tw-grad-from: #7E22CE; }
+    .from-amber-600 { --tw-grad-from: #D97706; }
+    .to-stone-950 { --tw-grad-to: #0C0A09; }
+    .from-pink-600 { --tw-grad-from: #DB2777; }
+    .to-cyan-950 { --tw-grad-to: #083344; }
+    .from-\[\#171226\] { --tw-grad-from: #171226; }
+    .to-\[\#1a1329\] { --tw-grad-to: #1A1329; }
+    .from-\[\#1f1736\] { --tw-grad-from: #1F1736; }
+    .to-\[\#1e1633\] { --tw-grad-to: #1E1633; }
+
+    /* Borders & Rounding */
+    .border { border: 1px solid var(--twitch-border); }
+    .border-2 { border: 2px solid var(--twitch-border); }
+    .border-4 { border: 4px solid var(--twitch-border); }
+    .border-t { border-top: 1px solid var(--twitch-border); }
+    .border-b { border-bottom: 1px solid var(--twitch-border); }
+    .border-r { border-right: 1px solid var(--twitch-border); }
+    .border-dashed { border-style: dashed; }
+    .border-twitch-border { border-color: #2F2F35; }
+    .border-twitch-purple { border-color: #9146FF; }
+    .border-twitch-purple\/30 { border-color: rgba(145, 70, 255, 0.30); }
+    .border-twitch-purple\/40 { border-color: rgba(145, 70, 255, 0.40); }
+    .border-twitch-purple\/50 { border-color: rgba(145, 70, 255, 0.50); }
+    .border-twitch-purple\/60 { border-color: rgba(145, 70, 255, 0.60); }
+    .border-white\/10 { border-color: rgba(255, 255, 255, 0.10); }
+    .border-white\/15 { border-color: rgba(255, 255, 255, 0.15); }
+    .border-white\/20 { border-color: rgba(255, 255, 255, 0.20); }
+    .border-gray-500 { border-color: #6B7280; }
+    .border-gray-700\/70 { border-color: rgba(55, 65, 81, 0.70); }
+    .border-gray-800 { border-color: #1F2937; }
+    .border-\[\#2a2a32\] { border-color: #2A2A32; }
+    .border-amber-400 { border-color: #FBBF24; }
+    .border-amber-400\/40 { border-color: rgba(251, 191, 36, 0.40); }
+    .border-amber-400\/50 { border-color: rgba(251, 191, 36, 0.50); }
+    .border-amber-400\/60 { border-color: rgba(251, 191, 36, 0.60); }
+    .border-amber-500\/30 { border-color: rgba(245, 158, 11, 0.30); }
+    .border-amber-500\/40 { border-color: rgba(245, 158, 11, 0.40); }
+    .border-amber-500\/60 { border-color: rgba(245, 158, 11, 0.60); }
+    .border-cyan-500\/40 { border-color: rgba(6, 182, 212, 0.40); }
+    .border-cyan-500\/50 { border-color: rgba(6, 182, 212, 0.50); }
+    .border-emerald-500\/40 { border-color: rgba(16, 185, 129, 0.40); }
+    .border-emerald-500\/60 { border-color: rgba(16, 185, 129, 0.60); }
+    .border-rose-500\/40 { border-color: rgba(244, 63, 94, 0.40); }
+    .border-rose-500\/60 { border-color: rgba(244, 63, 94, 0.60); }
+    .border-rose-800\/50 { border-color: rgba(159, 18, 57, 0.50); }
+    .border-pink-500\/35 { border-color: rgba(236, 72, 153, 0.35); }
+    .border-blue-400 { border-color: #60A5FA; }
+    .border-purple-400 { border-color: #C084FC; }
+    .border-pink-400 { border-color: #F472B6; }
+
+    .rounded { border-radius: 0.25rem; }
+    .rounded-md { border-radius: 0.375rem; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-xl { border-radius: 0.75rem; }
+    .rounded-2xl { border-radius: 1rem; }
+    .rounded-3xl { border-radius: 1.5rem; }
+    .rounded-\[20px\] { border-radius: 20px; }
+    .rounded-full { border-radius: 9999px; }
+
+    /* Effects & Interactions */
+    .shadow { box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+    .shadow-md { box-shadow: 0 4px 10px rgba(0,0,0,0.45); }
+    .shadow-lg { box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+    .shadow-xl { box-shadow: 0 15px 30px rgba(0,0,0,0.55); }
+    .shadow-2xl { box-shadow: 0 25px 50px rgba(0,0,0,0.7); }
+    .shadow-inner { box-shadow: inset 0 2px 6px rgba(0,0,0,0.6); }
+
+    .backdrop-blur-sm { backdrop-filter: blur(4px); }
+    .backdrop-blur-md { backdrop-filter: blur(12px); }
+    .backdrop-blur-xl { backdrop-filter: blur(24px); }
+    .overflow-hidden { overflow: hidden; }
+    .overflow-x-auto { overflow-x: auto; }
+    .overflow-y-auto { overflow-y: auto; }
+    .object-cover { object-fit: cover; }
+    .select-none { user-select: none; }
+    .pointer-events-none { pointer-events: none; }
+    .pointer-events-auto { pointer-events: auto; }
+    .cursor-pointer { cursor: pointer; }
+    .opacity-20 { opacity: 0.2; }
+    .opacity-30 { opacity: 0.3; }
+    .opacity-40 { opacity: 0.4; }
+    .opacity-60 { opacity: 0.6; }
+    .opacity-80 { opacity: 0.8; }
+
+    .transition, .transition-all, .transition-transform, .transition-colors {
+      transition: all 0.2s ease;
+    }
+    .duration-700 { transition-duration: 700ms; }
+    .hover\:text-white:hover { color: #FFFFFF; }
+    .hover\:border-twitch-purple:hover { border-color: #9146FF; }
+    .hover\:bg-twitch-elevated:hover { background-color: #1F1F23; }
+    .hover\:bg-twitch-border:hover { background-color: #2F2F35; }
+    .hover\:-translate-y-1:hover { transform: translateY(-4px); }
+    .focus\:outline-none:focus { outline: none; }
+    .focus\:border-twitch-purple:focus { border-color: #9146FF; }
+
+    /* Form Controls Base */
+    input[type="text"], input[type="number"], select, textarea {
+      background-color: #0E0E10;
+      border: 1px solid #2F2F35;
+      border-radius: 0.75rem;
+      color: #FFFFFF;
+    }
+
+    /* Rarity Badge Pill Colors */
+    .bg-gray-700\/80 { background-color: rgba(55, 65, 81, 0.85); }
+    .bg-blue-900\/80 { background-color: rgba(30, 58, 138, 0.85); }
+    .text-blue-200 { color: #BFDBFE; }
+    .bg-purple-900\/80 { background-color: rgba(88, 28, 135, 0.85); }
+    .bg-amber-900\/80 { background-color: rgba(120, 53, 15, 0.85); }
+    .bg-pink-900\/80 { background-color: rgba(131, 24, 67, 0.85); }
+    .text-pink-200 { color: #FBCFE8; }
+
+    /* 3D Card Flip & Perspective Utilities */
+    .perspective-1000 { perspective: 1000px; }
+    .preserve-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+
+    /* Rarity Glows & Borders */
+    .rarity-Common {
+      border-color: #9CA3AF !important;
+      box-shadow: 0 4px 16px rgba(156, 163, 175, 0.22);
+    }
+    .rarity-Rare {
+      border-color: #3B82F6 !important;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+    }
+    .rarity-Epic {
+      border-color: #A855F7 !important;
+      box-shadow: 0 4px 24px rgba(168, 85, 247, 0.5);
+    }
+    .rarity-Legendary {
+      border-color: #F59E0B !important;
+      box-shadow: 0 6px 28px rgba(245, 158, 11, 0.6);
+    }
+    .rarity-Holographic {
+      border-color: #EC4899 !important;
+      box-shadow: 0 6px 32px rgba(236, 72, 153, 0.65), 0 0 18px rgba(56, 189, 248, 0.5);
+    }
+
+    /* Animated Holographic Shimmer Overlay */
+    @keyframes holoShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .holo-foil {
+      background: linear-gradient(
+        125deg,
+        rgba(255, 0, 128, 0.25) 0%,
+        rgba(255, 204, 0, 0.22) 25%,
+        rgba(0, 255, 213, 0.25) 50%,
+        rgba(145, 70, 255, 0.28) 75%,
+        rgba(255, 0, 128, 0.25) 100%
+      );
+      background-size: 250% 250%;
+      animation: holoShift 4s ease infinite;
+      mix-blend-mode: screen;
+    }
+
+    .binder-sleeve {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0.01) 45%,
+        rgba(255, 255, 255, 0.05) 55%,
+        rgba(255, 255, 255, 0.0) 100%
+      );
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .animate-pulse { animation: pulseDot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.85) translateY(12px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .animate-pop-in { animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    .dropzone-active {
+      border-color: #9146FF !important;
+      background-color: rgba(145, 70, 255, 0.14) !important;
+      transform: scale(1.01);
+    }
+
+    @keyframes suspenseCharge {
+      0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+      15% { transform: scale(1.04) rotate(-3deg); filter: brightness(1.15); }
+      30% { transform: scale(1.07) rotate(3deg); filter: brightness(1.3); }
+      45% { transform: scale(1.1) rotate(-5deg); filter: brightness(1.45); }
+      60% { transform: scale(1.13) rotate(5deg); filter: brightness(1.65); }
+      75% { transform: scale(1.16) rotate(-7deg); filter: brightness(1.9); }
+      90% { transform: scale(1.22) rotate(6deg); filter: brightness(2.3); }
+      100% { transform: scale(0.2) rotate(0deg); opacity: 0; filter: brightness(3); }
+    }
+    .animate-suspense-charge { animation: suspenseCharge 1.65s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards; }
+
+    @keyframes auraPulse {
+      0%, 100% { transform: scale(0.95); opacity: 0.45; }
+      50% { transform: scale(1.15); opacity: 0.95; }
+    }
+    .animate-aura-pulse { animation: auraPulse 0.7s ease-in-out infinite; }
+
+    @keyframes screenFlash {
+      0% { opacity: 0.95; }
+      100% { opacity: 0; }
+    }
+    .animate-screen-flash { animation: screenFlash 0.65s ease-out forwards; }
+
+    @keyframes cardDealIn {
+      0% { opacity: 0; transform: translateY(45px) scale(0.75) rotateZ(-6deg); }
+      100% { opacity: 1; transform: translateY(0) scale(1) rotateZ(0deg); }
+    }
+    .animate-card-deal { animation: cardDealIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    /* Compact Twitch Panel Adjustments (when loaded inside narrow ~320px Twitch iframe) */
+    @media (max-width: 440px) {
+      header { padding: 0.5rem 0.75rem; }
+      #view-viewer { padding: 0.75rem; gap: 0.75rem; }
+    }
+  </style>
+</head>
+<body class="bg-twitch-dark text-gray-100 font-sans min-h-screen flex flex-col">
+
+  <!-- =================================================================== -->
+  <!-- TOP TWITCH EXTENSION BAR (ROLE & VIEWER CONTEXT SWITCHER)           -->
+  <!-- =================================================================== -->
+  <header class="sticky top-0 z-40 bg-twitch-panel/95 backdrop-blur-md border-b border-twitch-border px-3 sm:px-6 py-2.5 shadow-lg">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand Identity -->
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-twitch-purple to-indigo-600 flex items-center justify-center shadow-md">
+          <span class="text-base">🃏</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 style="margin:0;" class="font-bold text-sm sm:text-base tracking-tight text-white">TheChimmyTCG</h1>
+            <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-twitch-purple/20 text-twitch-accent border border-twitch-purple/40">
+              Twitch Ext
+            </span>
+          </div>
+          <p style="margin:0;" class="text-[11px] text-gray-400 hidden sm:block">Viewer Card Packs &amp; Personal Binders</p>
+        </div>
+      </div>
+
+      <!-- Mode Switcher (Hidden automatically when running live on Twitch) -->
+      <div id="sandbox-mode-bar" class="flex items-center bg-twitch-dark p-1 rounded-xl border border-twitch-border">
+        <button id="tab-viewer" onclick="switchRole('viewer')" class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 bg-twitch-purple text-white shadow">
+          <span>🗂️ Viewer Panel</span>
+        </button>
+        <button id="tab-twitch-preview" onclick="switchRole('twitch-preview')" class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 text-gray-400 hover:text-white">
+          <span>📺 On Stream</span>
+        </button>
+        <button id="tab-broadcaster" onclick="switchRole('broadcaster')" class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 text-gray-400 hover:text-white">
+          <span>⚙️ Config</span>
+        </button>
+      </div>
+
+      <!-- Viewer Identity & Sound Controls -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div id="sandbox-user-switcher" class="flex items-center gap-1.5 bg-twitch-dark border border-twitch-border rounded-xl px-2.5 py-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Connected"></span>
+          <label for="viewer-select" class="text-[11px] text-gray-400 hidden md:inline">Viewing as:</label>
+          <select id="viewer-select" onchange="switchSimulatedUser(this.value)" style="border:none;background:transparent;" class="text-xs sm:text-sm font-semibold text-white focus:outline-none cursor-pointer">
+            <option value="Viewer_1" class="bg-twitch-panel">Viewer_1 (Sub)</option>
+            <option value="Viewer_2" class="bg-twitch-panel">Viewer_2</option>
+            <option value="NightbotVIP" class="bg-twitch-panel">NightbotVIP</option>
+            <option value="ChatterBox99" class="bg-twitch-panel">ChatterBox99</option>
+          </select>
+          <button onclick="addSimulatedUser()" title="Simulate another Twitch viewer" class="ml-1 text-gray-400 hover:text-twitch-accent p-1 rounded-lg transition" style="background:transparent;border:none;">
+            +👤
+          </button>
+        </div>
+
+        <button id="sound-toggle" onclick="toggleSound()" title="Toggle Sound Effects" class="p-2 rounded-xl bg-twitch-dark border border-twitch-border text-gray-300 hover:text-white hover:border-twitch-purple transition">
+          <span id="sound-icon" class="text-xs sm:text-sm">🔊</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toast Notification Banner -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4 sm:px-0"></div>
+
+  <!-- =================================================================== -->
+  <!-- VIEW 1: TWITCH VIEWER PANEL & COLLECTOR BINDER                      -->
+  <!-- =================================================================== -->
+  <main id="view-viewer" class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    
+    <!-- LEFT COLUMN: BOOSTER PACK STATION (4 cols on desktop) -->
+    <section class="lg:col-span-4 flex flex-col gap-5">
+      <div class="bg-twitch-panel border border-twitch-border rounded-2xl p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-twitch-purple to-pink-500 p-0.5">
+              <div class="w-full h-full rounded-full bg-twitch-dark flex items-center justify-center font-bold text-sm text-white">
+                👑
+              </div>
+            </div>
+            <div>
+              <h2 id="channel-title-display" style="margin:0;" class="font-bold text-base text-white leading-tight">Creator's Official Deck</h2>
+              <p style="margin:0;" class="text-xs text-gray-400">Logged in: <span id="active-viewer-badge" class="text-twitch-accent font-semibold">Viewer_1</span></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 text-right">
+            <div>
+              <div class="text-[11px] uppercase tracking-wider text-gray-400">Chimbles</div>
+              <div class="flex items-center justify-end gap-1 text-cyan-400 font-extrabold text-base" title="Earned from duplicate card pulls — spend to craft uncollected cards!">
+                <span>💎</span>
+                <span id="viewer-chimbles-display">0</span>
+              </div>
+            </div>
+            <div style="width:1px;height:1.75rem;background:#2F2F35;"></div>
+            <div>
+              <div class="text-[11px] uppercase tracking-wider text-gray-400">Channel Pts</div>
+              <div class="flex items-center justify-end gap-1 text-amber-400 font-extrabold text-base">
+                <span>🪙</span>
+                <span id="viewer-points-display">6,000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Booster Pack Interactive Stage -->
+        <div class="relative bg-gradient-to-b from-twitch-dark to-twitch-elevated border border-twitch-border rounded-2xl p-5 flex flex-col items-center text-center overflow-hidden">
+          <!-- Active Cardset Pull Selector -->
+          <div class="relative z-10 w-full mb-3 text-left">
+            <label for="viewer-pack-set-select" class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
+              🗂️ Choose Cardset to Pull From
+            </label>
+            <select id="viewer-pack-set-select" onchange="selectViewerCardset(this.value)" class="w-full bg-twitch-dark/90 border border-twitch-border hover:border-twitch-purple rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-twitch-purple cursor-pointer transition">
+            </select>
+          </div>
+          
+          <span class="relative z-10 text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-twitch-purple/20 text-twitch-accent border border-twitch-purple/30 mb-3">
+            <span id="active-set-pill-label">Series 1</span> Booster Pack
+          </span>
+
+          <!-- Pack Pull Controls -->
+          <div class="relative z-10 w-full mt-1 flex flex-col gap-2.5">
+            <!-- Retired / Vaulted Set Notice -->
+            <div id="vaulted-set-banner" class="hidden w-full rounded-xl bg-cyan-950/50 border border-cyan-500/40 p-3 text-left">
+              <div class="text-[11px] font-extrabold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+                <span>📦 Vaulted Cardset (Pulls Disabled)</span>
+              </div>
+              <p style="margin:0.25rem 0 0;" class="text-[11px] text-gray-300">This set can no longer be pulled from packs, but missing cards can still be unlocked with <strong>Chimbles</strong> in your binder!</p>
+            </div>
+
+            <!-- Gifted Packs Banner -->
+            <div id="gifted-packs-banner" class="hidden w-full rounded-xl bg-amber-500/20 border border-amber-400/60 p-3 text-left animate-pop-in">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <div class="text-[11px] font-black uppercase tracking-wider text-amber-300">
+                    🎁 Broadcaster Gift (<span id="gifted-pack-count">1</span> Ready)
+                  </div>
+                  <p id="gifted-pack-note" style="margin:0.2rem 0 0;" class="text-[11px] text-gray-200">A free booster pack was gifted to you!</p>
+                </div>
+                <button onclick="openPack('gift')" style="border:none;" class="px-3 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-twitch-dark font-extrabold text-xs shadow-md transition whitespace-nowrap">
+                  Claim &amp; Rip!
+                </button>
+              </div>
+            </div>
+
+            <!-- Channel Points Pull Options: 1 Card (2000) & 3 Cards (4000) -->
+            <div id="channel-point-pull-buttons" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button id="btn-pull-1" onclick="openPack('points_1')" class="w-full py-2.5 px-3 rounded-xl bg-twitch-elevated hover:bg-twitch-border border border-amber-500/40 text-left transition flex flex-col justify-between">
+                <div class="flex items-center justify-between w-full">
+                  <span class="text-xs font-extrabold text-white">1 Card Pull</span>
+                  <span class="text-[11px] text-amber-400">⚡</span>
+                </div>
+                <div class="text-[11px] font-bold text-amber-400 mt-1 flex items-center gap-1">
+                  <span>🪙 2,000 Pts</span>
+                </div>
+              </button>
+
+              <button id="btn-pull-3" onclick="openPack('points_3')" style="border:none;" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-twitch-purple to-indigo-600 text-left shadow-lg transition flex flex-col justify-between">
+                <div class="flex items-center justify-between w-full">
+                  <span class="text-xs font-extrabold text-white">3 Card Pack</span>
+                  <span class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-black/30 text-amber-300">Save 2K</span>
+                </div>
+                <div class="text-[11px] font-bold text-amber-300 mt-1 flex items-center gap-1">
+                  <span>🪙 4,000 Pts</span>
+                </div>
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] text-gray-400 px-1">
+              <span>Need points to test?</span>
+              <button type="button" onclick="grantTestChannelPoints(5000)" style="background:transparent;border:none;padding:0;" class="text-amber-400 font-semibold underline">
+                +5,000 Test Pts
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earned Cardset Completion Badges Showcase -->
+      <div class="bg-twitch-panel border border-twitch-border rounded-2xl p-4 shadow-xl select-none pointer-events-none">
+        <div class="flex items-center justify-between mb-2.5">
+          <h3 style="margin:0;" class="text-xs font-extrabold uppercase tracking-wider text-gray-300">
+            🏅 Earned Set Badges (<span id="earned-badges-count">0</span>)
+          </h3>
+          <span class="text-[10px] text-gray-500">100% Set Reward</span>
+        </div>
+        <div id="viewer-earned-badges-list" class="flex flex-wrap gap-2"></div>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: USER-SPECIFIC COLLECTOR BINDER (8 cols on desktop) -->
+    <section class="lg:col-span-8 flex flex-col">
+      <div class="bg-twitch-panel border border-twitch-border rounded-2xl p-5 shadow-xl flex-1 flex flex-col">
+        <!-- Cardset Details & Set Badge Reward Banner (Non-interactive Display) -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-twitch-border select-none pointer-events-none">
+          <div class="flex items-center gap-2 overflow-x-auto pb-1" id="viewer-cardset-tabs"></div>
+          <div id="active-set-badge-banner" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-twitch-dark border border-twitch-border text-xs"></div>
+        </div>
+
+        <!-- Binder Progress Header -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mt-4 select-none pointer-events-none">
+          <div>
+            <h3 style="margin:0;" class="font-extrabold text-base text-white flex items-center gap-2">
+              <span id="binder-set-heading">Series 1: Stream Legends</span>
+              <span class="text-xs font-semibold text-gray-400">• <span id="binder-completion-text">0 / 9 (0%)</span></span>
+            </h3>
+            <div class="w-48 sm:w-64 h-1.5 bg-twitch-dark rounded-full overflow-hidden mt-1.5">
+              <div id="binder-completion-bar" class="h-full bg-gradient-to-r from-twitch-purple to-emerald-400 transition-all" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Binder Filter & View Controls -->
+        <div class="flex flex-wrap items-center justify-between gap-3 my-4">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button onclick="setBinderFilter('ALL')" data-filter="ALL" style="border:none;" class="binder-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-twitch-purple text-white transition">All Slots</button>
+            <button onclick="setBinderFilter('OWNED')" data-filter="OWNED" class="binder-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-twitch-dark text-gray-400 hover:text-white border border-twitch-border transition">Owned</button>
+            <button onclick="setBinderFilter('MISSING')" data-filter="MISSING" class="binder-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-twitch-dark text-gray-400 hover:text-white border border-twitch-border transition">Missing</button>
+            <select id="binder-rarity-filter" onchange="renderBinder()" class="bg-twitch-dark border border-twitch-border rounded-lg px-2.5 py-1.5 text-xs text-gray-200 focus:outline-none focus:border-twitch-purple">
+              <option value="ALL">All Rarities</option>
+              <option value="Common">Common</option>
+              <option value="Rare">Rare</option>
+              <option value="Epic">Epic</option>
+              <option value="Legendary">Legendary</option>
+              <option value="Holographic">Holographic</option>
+            </select>
+          </div>
+
+          <!-- Binder Page Pagination -->
+          <div class="flex items-center gap-2 bg-twitch-dark border border-twitch-border rounded-xl px-2.5 py-1">
+            <button onclick="changeBinderPage(-1)" id="btn-prev-page" style="background:transparent;border:none;" class="p-1.5 text-gray-400 hover:text-white transition">◀</button>
+            <span id="binder-page-indicator" class="text-xs font-bold text-gray-200 px-2">Page 1 / 1</span>
+            <button onclick="changeBinderPage(1)" id="btn-next-page" style="background:transparent;border:none;" class="p-1.5 text-gray-400 hover:text-white transition">▶</button>
+          </div>
+        </div>
+
+        <!-- 9-Pocket Binder Page Grid -->
+        <div class="relative bg-[#131316] border-2 border-[#2a2a32] rounded-2xl p-4 sm:p-6 shadow-inner flex-1 flex items-center">
+          <div class="hidden sm:flex flex-col justify-between h-full py-8 pr-4 mr-4 border-r border-dashed border-gray-700/70 select-none">
+            <div class="w-4 h-7 rounded-full border-4 border-gray-500 bg-twitch-dark shadow-inner"></div>
+            <div class="w-4 h-7 rounded-full border-4 border-gray-500 bg-twitch-dark shadow-inner"></div>
+            <div class="w-4 h-7 rounded-full border-4 border-gray-500 bg-twitch-dark shadow-inner"></div>
+          </div>
+
+          <div id="binder-grid" class="w-full grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =================================================================== -->
+  <!-- VIEW 1B: TWITCH CHANNEL PAGE & EXTENSION PLACEMENT PREVIEW          -->
+  <!-- =================================================================== -->
+  <main id="view-twitch-preview" class="hidden flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-5">
+    <div class="mb-4 bg-twitch-panel border border-twitch-border rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5 text-xs sm:text-sm">
+        <span class="px-2.5 py-0.5 rounded-full bg-rose-600/20 text-rose-400 border border-rose-500/40 font-bold text-[11px] uppercase tracking-wider">
+          Live Stream Mockup
+        </span>
+        <span class="text-gray-300">Previewing how <strong class="text-white" id="preview-viewer-name">Viewer_1</strong> experiences your extension on a live Twitch channel page.</span>
+      </div>
+      <button onclick="switchRole('viewer')" style="border:none;" class="px-3 py-1.5 rounded-xl bg-twitch-purple text-white text-xs font-bold transition">
+        Back to Fullscreen Binder
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div class="lg:col-span-9 flex flex-col gap-4">
+        <div class="relative aspect-video w-full rounded-2xl overflow-hidden bg-gradient-to-br from-[#171226] to-[#1a1329] border border-twitch-border shadow-2xl">
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 pointer-events-none">
+            <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 text-3xl">🎮</div>
+            <p style="margin:0;" class="text-sm font-bold text-gray-300">Live Stream Video Feed (1080p60)</p>
+            <p style="margin:0.25rem 0 0;" class="text-xs text-gray-500 max-w-md">Viewers open your extension via the Video Overlay button on the right or in the Panels below.</p>
+          </div>
+
+          <div class="absolute top-3 left-3 flex items-center gap-2 z-10">
+            <span class="px-2 py-0.5 rounded bg-rose-600 text-white text-[11px] font-extrabold tracking-wider uppercase shadow">LIVE</span>
+            <span class="px-2.5 py-0.5 rounded bg-black/70 text-gray-200 text-[11px] font-semibold">👤 1,428 viewers</span>
+          </div>
+
+          <!-- GLOBAL STREAM OVERLAY ALERT STAGE (FIFO QUEUE) -->
+          <div id="global-stream-overlay-stage" class="hidden absolute top-3 right-3 z-30 pointer-events-none max-w-xs w-full">
+            <div id="global-overlay-card-box" class="bg-twitch-panel/95 backdrop-blur-xl border-2 border-twitch-purple rounded-2xl p-3 shadow-2xl animate-pop-in relative overflow-hidden">
+              <div id="global-overlay-holo" class="hidden holo-foil absolute inset-0 pointer-events-none"></div>
+              <div class="flex items-center justify-between gap-2 mb-2 relative z-10">
+                <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-twitch-purple text-white">
+                  📡 Stream Showcase
+                </span>
+                <span id="global-overlay-queue-badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                  +1 in queue
+                </span>
+              </div>
+              <div class="flex items-center gap-3 relative z-10">
+                <div id="global-overlay-art" class="w-14 aspect-[3/4] rounded-xl border border-white/20 bg-black/50 flex items-center justify-center overflow-hidden flex-shrink-0"></div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-[11px] font-bold text-twitch-accent truncate" id="global-overlay-viewer">Viewer_1</div>
+                  <div class="text-xs sm:text-sm font-black text-white truncate" id="global-overlay-card-name">Card Name</div>
+                  <div class="mt-1 flex items-center gap-1.5">
+                    <span id="global-overlay-rarity" class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded border">Rare</span>
+                    <span class="text-[10px] text-gray-300 truncate">showed off their pull!</span>
+                  </div>
+                </div>
+              </div>
+              <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden mt-2.5 relative z-10">
+                <div id="global-overlay-timer-bar" class="h-full bg-gradient-to-r from-twitch-purple to-amber-500" style="width: 100%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="absolute bottom-3 left-3 z-20 flex items-center gap-2">
+            <button type="button" onclick="simulateSimultaneousShowOffs()" class="px-3 py-1.5 rounded-xl bg-black/75 border border-white/15 text-[11px] font-bold text-gray-200 hover:text-white transition shadow-lg">
+              👥 Test 2 Viewers Showing Off Simultaneously
+            </button>
+          </div>
+
+          <div style="top:50%;transform:translateY(-50%);" class="absolute right-3 z-20 flex items-center gap-2">
+            <div id="video-overlay-drawer" class="hidden w-64 bg-twitch-panel/95 backdrop-blur-md border border-twitch-purple/60 rounded-2xl p-3.5 shadow-2xl animate-pop-in">
+              <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-twitch-border">
+                <span class="text-xs font-extrabold text-white">🃏 TheChimmyTCG Overlay</span>
+                <button onclick="toggleVideoOverlayDrawer()" style="background:transparent;border:none;" class="text-gray-400 hover:text-white text-xs">✕</button>
+              </div>
+              <div class="text-center space-y-2.5">
+                <select id="overlay-cardset-select" onchange="selectViewerCardset(this.value)" class="w-full bg-twitch-dark border border-twitch-border rounded-xl px-2.5 py-1.5 text-[11px] font-bold text-white"></select>
+                <div class="bg-twitch-dark border border-twitch-border rounded-xl p-2.5">
+                  <div class="text-[11px] text-gray-400" id="overlay-set-name">Series 1 Progress</div>
+                  <div id="overlay-completion-text" class="text-sm font-extrabold text-white mt-0.5">0 / 9 Cards Collected</div>
+                </div>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <button onclick="quickPullFromTwitchPreview(1)" class="py-2 px-2 rounded-xl bg-twitch-elevated border border-amber-500/40 text-white text-[11px] font-bold">1 Card (2,000)</button>
+                  <button onclick="quickPullFromTwitchPreview(3)" style="border:none;" class="py-2 px-2 rounded-xl bg-gradient-to-r from-twitch-purple to-indigo-600 text-white text-[11px] font-bold shadow">3 Cards (4,000)</button>
+                </div>
+                <div id="overlay-last-pull-box" class="hidden text-[11px] bg-emerald-950/60 border border-emerald-500/40 rounded-lg p-2 text-emerald-200"></div>
+              </div>
+            </div>
+
+            <button onclick="toggleVideoOverlayDrawer()" title="Toggle Twitch Video Component Extension" style="border:1px solid rgba(255,255,255,0.2);" class="w-11 h-11 rounded-xl bg-twitch-purple text-white shadow-lg flex items-center justify-center text-base">
+              🃏
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-twitch-panel border-2 border-twitch-purple/50 rounded-2xl p-4 shadow-xl flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-2.5 mb-3 border-b border-twitch-border">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-white">🃏 Twitch Extension Panel</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-twitch-dark text-gray-400 border border-twitch-border">318px × 490px</span>
+              </div>
+
+              <div class="bg-twitch-dark border border-twitch-border rounded-xl p-3 text-center mb-3">
+                <select id="panel-cardset-select" onchange="selectViewerCardset(this.value)" class="w-full bg-twitch-panel border border-twitch-border rounded-lg px-2.5 py-1.5 text-xs font-bold text-white mb-2"></select>
+                <div class="text-[11px] text-gray-400 mb-2.5">
+                  Pts: <span id="panel-points-val" class="text-amber-400 font-bold">6,000</span> • Chimbles: <span id="panel-chimbles-val" class="text-cyan-400 font-bold">0</span> • Set: <span id="panel-set-progress" class="text-emerald-400 font-bold">0/9</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <button onclick="quickPullFromTwitchPreview(1)" class="py-2 px-2 rounded-xl bg-twitch-elevated border border-amber-500/40 text-white text-[11px] font-extrabold">1 Card • 2,000 Pts</button>
+                  <button onclick="quickPullFromTwitchPreview(3)" style="border:none;" class="py-2 px-2 rounded-xl bg-gradient-to-r from-twitch-purple to-indigo-600 text-white text-[11px] font-extrabold shadow-md">3 Cards • 4,000 Pts</button>
+                </div>
+              </div>
+
+              <div class="text-[11px] font-bold text-gray-400 mb-2 flex items-center justify-between">
+                <span>Your Recent Binder Cards</span>
+                <button onclick="switchRole('viewer')" style="background:transparent;border:none;padding:0;" class="text-twitch-accent underline">Open Full Binder →</button>
+              </div>
+              <div id="panel-mini-binder-grid" class="grid grid-cols-3 gap-2"></div>
+            </div>
+          </div>
+
+          <div class="bg-twitch-panel border border-twitch-border rounded-2xl p-4 flex flex-col justify-between text-xs text-gray-300">
+            <div class="space-y-2.5">
+              <div class="font-extrabold text-sm text-white">How Viewer Card Pulling Works</div>
+              <p style="margin:0;" class="text-gray-400 leading-relaxed">
+                Viewers interact with your extension directly beneath your stream in the <strong>About Panels</strong> or via the <strong>Stream Overlay</strong> on the video player.
+              </p>
+              <ul style="padding-left:1.1rem;margin:0;" class="space-y-1.5 text-gray-300">
+                <li><strong>Choose Any Active Cardset:</strong> All non-vaulted cardsets are live simultaneously—viewers pick which set to pull from.</li>
+                <li><strong>Channel Point Packs:</strong> Pull <strong>1 Card (2,000 Pts)</strong> or a <strong>3-Card Pack (4,000 Pts)</strong>, or open gifts sent by the broadcaster.</li>
+                <li><strong>Duplicate → Chimbles Crafting:</strong> Duplicate pulls convert into <strong>Chimbles</strong> to unlock hidden uncollected cards (even in vaulted sets).</li>
+                <li><strong>Set Badges:</strong> Complete 100% of any cardset to unlock its exclusive completion badge in your binder.</li>
+              </ul>
+            </div>
+            <div class="mt-4 pt-3 border-t border-twitch-border flex items-center justify-between text-[11px] text-gray-400">
+              <span>Twitch Extension Sandbox</span>
+              <button onclick="switchRole('broadcaster')" style="background:transparent;border:none;padding:0;" class="text-twitch-accent underline font-semibold">Customize Cards →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-3 bg-twitch-panel border border-twitch-border rounded-2xl flex flex-col overflow-hidden" style="min-height:480px;">
+        <div class="px-3.5 py-2.5 border-b border-twitch-border text-center text-xs font-extrabold uppercase tracking-wider text-gray-300">
+          Stream Chat
+        </div>
+        <div id="simulated-twitch-chat" class="flex-1 p-3 space-y-2.5 overflow-y-auto text-xs">
+          <div><span class="font-bold text-emerald-400">NightbotVIP:</span> <span class="text-gray-300">Just pulled a Rare VIP Diamond Badge from the panel below! 💎</span></div>
+          <div><span class="font-bold text-amber-400">ChatterBox99:</span> <span class="text-gray-300">I'm 1 card away from finishing Series 1!!</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- =================================================================== -->
+  <!-- VIEW 2: BROADCASTER CONFIGURATION & CARD CREATOR DASHBOARD          -->
+  <!-- =================================================================== -->
+  <main id="view-broadcaster" class="hidden flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    
+    <section class="lg:col-span-5 flex flex-col gap-5">
+      <!-- Cardsets Manager -->
+      <div class="bg-twitch-panel border border-twitch-border rounded-2xl p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <h2 style="margin:0;" class="text-base font-extrabold text-white">🗂️ Manage Cardsets &amp; Badge Rewards</h2>
+          <button type="button" onclick="createNewCardset()" style="border:none;" class="px-2.5 py-1 rounded-lg bg-twitch-purple text-white text-xs font-bold transition">
+            + New Set
+          </button>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block text-gray-400 font-semibold mb-1">Active Cardset Being Edited</label>
+            <div class="flex gap-2">
+              <select id="cfg-active-set-select" onchange="switchActiveCardset(this.value)" class="flex-1 bg-twitch-dark border border-twitch-border rounded-xl px-3 py-2 text-white font-semibold"></select>
+              <button type="button" id="btn-delete-cardset" onclick="deleteCurrentCardset()" title="Delete this cardset" class="px-3 py-2 rounded-xl bg-rose-950/60 border border-rose-800/50 text-rose-300 hover:text-white transition">
+                🗑️
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block text-gray-400 font-semibold mb-1">Cardset Name</label>
+              <input id="cfg-set-name" type="text" onchange="saveActiveCardsetDetails()" class="w-full px-3 py-2" placeholder="e.g., Series 1: Stream Legends" />
+            </div>
+            <div>
+              <label class="block text-gray-400 font-semibold mb-1">Completion Badge Title</label>
+              <input id="cfg-set-badge-name" type="text" onchange="saveActiveCardsetDetails()" class="w-full px-3 py-2" placeholder="e.g., Series 1 Master" />
+            </div>
+            <div>
+              <label class="block text-gray-400 font-semibold mb-1">Badge Icon (Emoji)</label>
+              <input id="cfg-set-badge-emoji" type="text" maxlength="4" onchange="saveActiveCardsetDetails()" class="w-full px-3 py-2 text-center text-base" placeholder="🏆" />
+            </div>
+            <div class="sm:col-span-2 flex items-center justify-between bg-twitch-dark border border-twitch-border rounded-xl px-3.5 py-2.5">
+              <div>
+                <div class="font-bold text-white">Allow Pack Pulls for This Set</div>
+                <div class="text-[11px] text-gray-400">If turned off, viewers cannot pull this set from packs (Chimbles unlock still works).</div>
+              </div>
+              <input id="cfg-set-pullable" type="checkbox" checked onchange="saveActiveCardsetDetails()" style="width:1.25rem;height:1.25rem;accent-color:#9146FF;" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Extension Global Settings -->
+      <div class="bg-twitch-panel border border-twitch-border rounded-2xl p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <h2 style="margin:0;" class="text-base font-extrabold text-white">⚙️ Channel &amp; Pack Rules</h2>
+          <span class="text-[11px] text-emerald-400 font-semibold">● Auto-Saved</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="sm:col-span-2">
+            <label class="block text-gray-400 font-semibold mb-1">Channel Deck Header Title</label>
+            <input id="cfg-deck-title" type="text" onchange="saveChannelSettings()" class="w-full px-3 py-2" />
+          </div>
+          <div>
+            <label class="block text-gray-400 font-semibold mb-1">1-Card Pull Cost (Pts)</label>
+            <input id="cfg-cost-1" type="number" min="100" step="100" onchange="saveChannelSettings()" class="w-full px-3 py-2" />
+          </div>
+          <div>
+            <label class="block text-gray-400 font-semibold mb-1">3-Card Pack Cost (Pts)</label>
+            <input id="cfg-cost-3" type="number" min="100" step="100" onchange="saveChannelSettings()" class="w-full px-3 py-2" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Broadcaster Gift Card Pulls -->
+      <div class="bg-twitch-panel border border-amber-500/40 rounded-2xl p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-3">
+          <h2 style="margin:0;" class="text-base font-extrabold text-white">🎁 Gift Card Pulls to Viewer</h2>
+          <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">Mod / Streamer</span>
+        </div>
+
+        <form onsubmit="giftPullsToViewer(event)" class="space-y-3 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-gray-400 font-semibold mb-1">Select or Type Viewer *</label>
+              <input id="gift-recipient-input" list="gift-viewer-datalist" type="text" required placeholder="e.g., Viewer_1" class="w-full px-3 py-2" />
+              <datalist id="gift-viewer-datalist"></datalist>
+            </div>
+            <div>
+              <label class="block text-gray-400 font-semibold mb-1">Gift Type</label>
+              <select id="gift-pull-mode" onchange="toggleGiftSpecificCardSelect()" class="w-full px-3 py-2">
+                <option value="pack">Random Booster Pack(s)</option>
+                <option value="guaranteed">Guaranteed Specific Card</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div id="gift-pack-qty-wrapper">
+              <label class="block text-gray-400 font-semibold mb-1">Number of Packs</label>
+              <input id="gift-pack-qty" type="number" min="1" max="20" value="1" class="w-full px-3 py-2" />
+            </div>
+            <div id="gift-specific-card-wrapper" class="hidden">
+              <label class="block text-gray-400 font-semibold mb-1">Choose Card to Gift</label>
+              <select id="gift-specific-card-select" class="w-full px-3 py-2"></select>
+            </div>
+            <div>
+              <label class="block text-gray-400 font-semibold mb-1">Gift Note (Optional)</label>
+              <input id="gift-note-input" type="text" placeholder="Thanks for the hype!" class="w-full px-3 py-2" />
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-2 pt-1">
+            <button type="submit" style="border:none;" class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-twitch-dark font-extrabold text-xs sm:text-sm shadow-lg transition">
+              Send Gift to Viewer
+            </button>
+            <button type="button" onclick="giftAndPreviewAsViewer()" class="py-2.5 px-3.5 rounded-xl bg-twitch-elevated border border-twitch-border text-gray-200 font-semibold text-xs transition">
+              👁️ Send &amp; Watch Pull
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-3 pt-3 border-t border-twitch-border">
+          <div class="text-[11px] font-bold text-gray-400 mb-2 flex items-center justify-between">
+            <span>Unclaimed Viewer Gifts</span>
+            <span id="pending-gifts-total" class="text-amber-300">0 pending</span>
+          </div>
+          <div id="pending-gifts-list" class="space-y-1.5 max-h-28 overflow-y-auto text-[11px]"></div>
+        </div>
+      </div>
+
+      <!-- Custom Card Creator / Editor Form -->
+      <div class="bg-twitch-panel border border-twitch-border rounded-2xl p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <h2 id="card-form-heading" style="margin:0;" class="text-base font-extrabold text-white">➕ Add New Custom Card</h2>
+          <button id="btn-cancel-edit" onclick="resetCardForm()" style="background:transparent;border:none;" class="hidden text-xs text-gray-400 hover:text-white underline">Cancel Edit</button>
+        </div>
+
+        <form id="card-creator-form" onsubmit="saveCardFromForm(event)" class="space-y-3 text-xs">
+          <input type="hidden" id="edit-card-id" value="" />
+
+          <div>
+            <label class="block text-gray-400 font-semibold mb-1">Card Name *</label>
+            <input id="card-name" type="text" required oninput="updateLiveFormPreview()" placeholder="e.g., Golden PogChamp" class="w-full px-3 py-2" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-gray-400 font-semibold mb-1">Rarity Tier *</label>
+              <select id="card-rarity" onchange="updateLiveFormPreview()" class="w-full px-3 py-2">
+                <option value="Common">Common (Silver)</option>
+                <option value="Rare">Rare (Sapphire)</option>
+                <option value="Epic">Epic (Amethyst)</option>
+                <option value="Legendary">Legendary (Gold)</option>
+                <option value="Holographic">Holographic (Prismatic)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-gray-400 font-semibold mb-1">Card Emoji / Icon Badge</label>
+              <input id="card-emoji" type="text" maxlength="4" value="🔥" oninput="updateLiveFormPreview()" class="w-full px-3 py-2 text-center text-base" />
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-gray-400 font-semibold">Custom Art (Local Upload or URL)</label>
+              <label for="single-card-file-input" class="cursor-pointer text-[11px] font-semibold text-twitch-accent hover:text-white">
+                ⬆️ Upload Local Image
+              </label>
+              <input id="single-card-file-input" type="file" accept="image/*" class="hidden" onchange="handleSingleCardImageUpload(event)" />
+            </div>
+            <div class="flex gap-2">
+              <input id="card-image-url" type="text" oninput="updateLiveFormPreview()" placeholder="Paste URL or upload local image..." class="flex-1 px-3 py-2" />
+              <button type="button" id="btn-clear-single-img" onclick="clearSingleCardImage()" title="Clear image" class="hidden px-2.5 py-2 rounded-xl bg-twitch-dark border border-twitch-border text-gray-400">
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-gray-400 font-semibold mb-1">Card Flavor Text / Lore</label>
+            <textarea id="card-desc" rows="2" oninput="updateLiveFormPreview()" placeholder="A legendary moment from the 24-hour subathon..." class="w-full px-3 py-2"></textarea>
+          </div>
+
+          <div class="bg-twitch-dark border border-twitch-border rounded-xl p-3 flex items-center gap-4">
+            <div id="form-live-preview" class="w-28 flex-shrink-0"></div>
+            <div class="text-[11px] text-gray-400 space-y-1">
+              <div class="font-bold text-gray-200">Live Card Preview</div>
+              <p style="margin:0;">Rarities automatically apply custom border glows and holographic foil shaders.</p>
+              <p id="form-odds-preview" style="margin:0;" class="text-twitch-accent font-semibold">Estimated Pull Odds: --%</p>
+            </div>
+          </div>
+
+          <button type="submit" style="border:none;" class="w-full py-3 px-4 rounded-xl bg-twitch-purple text-white font-bold text-sm shadow-lg transition">
+            💾 <span id="btn-save-card-label">Add Card to Collection Pool</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: ACTIVE CARD COLLECTION MANAGER & BATCH UPLOAD (7 cols) -->
+    <section class="lg:col-span-7 flex flex-col gap-4">
+      <div class="bg-twitch-panel border border-twitch-border rounded-2xl p-5 shadow-xl flex-1 flex flex-col">
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-twitch-border">
+          <div>
+            <h2 style="margin:0;" class="text-lg font-extrabold text-white">Active Collection Pool</h2>
+            <p style="margin:0;" class="text-xs text-gray-400">Manage cards viewers can pull from your booster packs</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="triggerBatchFilePicker()" style="border:none;" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-twitch-purple to-indigo-600 text-white text-xs font-bold shadow-md transition">
+              🖼️ Batch Upload Cards
+            </button>
+            <input id="batch-image-input" type="file" accept="image/*" multiple class="hidden" onchange="handleBatchImageFiles(this.files)" />
+
+            <button onclick="exportCollectionJSON()" class="px-3 py-2 rounded-xl bg-twitch-dark border border-twitch-border text-xs font-semibold text-gray-200 transition">
+              ⬇️ Export
+            </button>
+            <label class="px-3 py-2 rounded-xl bg-twitch-dark border border-twitch-border text-xs font-semibold text-gray-200 transition cursor-pointer">
+              ⬆️ JSON
+              <input type="file" accept=".json" onchange="importCollectionJSON(event)" class="hidden" />
+            </label>
+            <button onclick="resetToDefaultDeck()" class="px-3 py-2 rounded-xl bg-rose-950/50 border border-rose-800/50 text-xs font-semibold text-rose-300 transition">
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <div
+          id="batch-dropzone"
+          onclick="triggerBatchFilePicker()"
+          ondragover="handleBatchDragOver(event)"
+          ondragleave="handleBatchDragLeave(event)"
+          ondrop="handleBatchDrop(event)"
+          class="mt-4 border-2 border-dashed border-twitch-border bg-twitch-dark/70 rounded-2xl p-4 text-center cursor-pointer transition-all"
+        >
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3 text-left">
+              <div class="w-10 h-10 rounded-xl bg-twitch-purple/15 border border-twitch-purple/30 flex items-center justify-center text-twitch-accent flex-shrink-0 text-lg">
+                ☁️
+              </div>
+              <div>
+                <div class="text-xs sm:text-sm font-bold text-white">
+                  Drag &amp; drop multiple local images here, or <span class="text-twitch-accent underline">browse files</span>
+                </div>
+                <p style="margin:0;" class="text-[11px] text-gray-400">
+                  Supports PNG, JPG, WebP, GIF • Auto-compressed &amp; named from filenames
+                </p>
+              </div>
+            </div>
+            <div class="w-full sm:w-44 bg-twitch-panel border border-twitch-border rounded-xl px-3 py-2 text-left flex-shrink-0" onclick="event.stopPropagation()">
+              <div class="flex justify-between text-[10px] font-semibold text-gray-400 mb-1">
+                <span>Extension Storage</span>
+                <span id="storage-usage-label" class="text-gray-200">0%</span>
+              </div>
+              <div class="w-full h-1.5 bg-twitch-dark rounded-full overflow-hidden">
+                <div id="storage-usage-bar" class="h-full bg-emerald-400 transition-all" style="width: 5%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="broadcaster-card-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4 overflow-y-auto max-h-[640px] pr-1"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =================================================================== -->
+  <!-- MODAL 1: BATCH IMAGE UPLOAD & BULK CARD STAGING STUDIO              -->
+  <!-- =================================================================== -->
+  <div id="batch-upload-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
+    <div class="bg-twitch-panel border border-twitch-border rounded-2xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl animate-pop-in">
+      <div class="p-4 sm:p-5 border-b border-twitch-border flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-twitch-purple/20 text-twitch-accent border border-twitch-purple/40">
+            Batch Creator
+          </span>
+          <h3 style="margin:0.25rem 0 0;" class="text-base sm:text-lg font-extrabold text-white">Configure Uploaded Cards (<span id="batch-count-badge">0</span>)</h3>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="triggerBatchFilePicker()" class="px-3 py-1.5 rounded-xl bg-twitch-elevated border border-twitch-border text-xs font-semibold text-gray-200">
+            + Add More Images
+          </button>
+          <button onclick="closeBatchModal()" class="p-2 rounded-xl bg-twitch-dark border border-twitch-border text-gray-400 hover:text-white">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <div class="px-4 sm:px-5 py-3 bg-twitch-dark/90 border-b border-twitch-border flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="font-bold text-gray-300">✨ Bulk Apply to All:</span>
+          <select id="bulk-rarity-select" onchange="applyBulkRarity(this.value)" class="px-2.5 py-1.5 text-white">
+            <option value="">Set All Rarity...</option>
+            <option value="Common">All Common</option>
+            <option value="Rare">All Rare</option>
+            <option value="Epic">All Epic</option>
+            <option value="Legendary">All Legendary</option>
+            <option value="Holographic">All Holographic</option>
+          </select>
+        </div>
+
+        <button type="button" onclick="clearBatchStaging()" style="background:transparent;border:none;" class="text-rose-400 font-semibold">
+          🗑️ Clear All
+        </button>
+      </div>
+
+      <div id="batch-staging-grid" class="p-4 sm:p-5 overflow-y-auto flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+      <div class="p-4 sm:p-5 border-t border-twitch-border bg-twitch-dark/60 flex flex-wrap items-center justify-between gap-3 rounded-b-2xl">
+        <div class="text-xs text-gray-400">Images are automatically optimized (max 450px) for fast Twitch panel loading.</div>
+        <div class="flex items-center gap-2.5">
+          <button type="button" onclick="closeBatchModal()" class="px-4 py-2.5 rounded-xl bg-twitch-elevated border border-twitch-border text-xs font-semibold text-gray-300">Cancel</button>
+          <button type="button" onclick="commitBatchCards()" style="border:none;" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs sm:text-sm font-extrabold shadow-lg">
+            Create All <span id="batch-commit-count">0</span> Cards
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL 2: CARD INSPECTOR                                             -->
+  <!-- =================================================================== -->
+  <div id="card-detail-modal" onclick="closeCardDetailModal(event)" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div onclick="event.stopPropagation()" class="bg-twitch-panel border border-twitch-border rounded-2xl max-w-md w-full p-6 shadow-2xl animate-pop-in relative">
+      <button onclick="closeCardDetailModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-twitch-dark border border-twitch-border flex items-center justify-center text-gray-400 hover:text-white">
+        ✕
+      </button>
+      <div id="card-detail-content" class="flex flex-col items-center"></div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL 3: SUSPENSEFUL FULL-SCREEN CARD PULL OVERLAY                  -->
+  <!-- =================================================================== -->
+  <div id="suspense-pull-overlay" class="hidden fixed inset-0 z-50 bg-[#07070a]/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 sm:p-6 overflow-hidden select-none">
+    <div id="suspense-ambient-glow" style="width:520px;height:520px;filter:blur(110px);" class="absolute rounded-full bg-twitch-purple/25 pointer-events-none"></div>
+    <div id="suspense-flash-layer" class="hidden fixed inset-0 bg-white pointer-events-none z-50"></div>
+
+    <div class="relative z-10 w-full max-w-4xl flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2.5">
+        <span class="px-2.5 py-1 rounded-full bg-twitch-purple/20 border border-twitch-purple/50 text-twitch-accent text-[11px] font-extrabold uppercase tracking-widest">
+          ✨ Pack Opening
+        </span>
+        <span id="suspense-viewer-tag" class="text-xs sm:text-sm font-bold text-gray-300">Viewer_1</span>
+      </div>
+      <button onclick="closeSuspenseOverlay()" class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-gray-300 hover:text-white">
+        Skip / Close ✕
+      </button>
+    </div>
+
+    <div id="suspense-pack-stage" class="relative z-10 flex flex-col items-center justify-center my-auto py-8">
+      <div id="suspense-pack-aura" style="filter:blur(32px);" class="absolute w-64 h-80 rounded-full bg-twitch-purple/50 animate-aura-pulse pointer-events-none"></div>
+
+      <div id="suspense-pack-wrapper" class="relative w-52 h-72 rounded-3xl bg-gradient-to-br from-twitch-purple to-pink-600 p-1.5 shadow-2xl">
+        <div class="w-full h-full rounded-[20px] bg-twitch-dark/90 flex flex-col items-center justify-between p-5 border border-white/20 relative overflow-hidden">
+          <div class="holo-foil absolute inset-0 opacity-60 pointer-events-none"></div>
+          <div class="w-full flex justify-between items-center text-[11px] font-extrabold text-purple-200 z-10">
+            <span>THECHIMMYTCG</span>
+            <span id="suspense-pack-count">3 CARDS</span>
+          </div>
+          <div class="z-10 my-auto flex flex-col items-center">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-twitch-purple to-pink-500 flex items-center justify-center shadow-xl mb-3 text-4xl">
+              ⚡
+            </div>
+            <span class="font-display font-black text-lg tracking-wider text-white text-center leading-tight">CHIMMY<br/>LEGENDS</span>
+          </div>
+          <div class="z-10 text-[10px] font-bold uppercase tracking-widest text-purple-200 animate-pulse">
+            Charging Energy...
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-7 text-center max-w-xs w-full">
+        <p id="suspense-status-text" style="margin:0;" class="text-sm sm:text-base font-extrabold text-white tracking-wide">
+          Detecting card signatures...
+        </p>
+        <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mt-3">
+          <div id="suspense-charge-bar" class="h-full bg-gradient-to-r from-twitch-purple to-amber-500 transition-all" style="width: 10%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="suspense-cards-stage" class="hidden relative z-10 w-full max-w-5xl flex-col items-center my-auto">
+      <div class="text-center mb-5">
+        <span id="suspense-rarity-hint" class="inline-block text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-white/10 text-purple-200 border border-white/15 mb-1.5">
+          Mystery Pulls Ready
+        </span>
+        <h2 style="margin:0;" class="text-xl sm:text-2xl font-black text-white">Tap each card to reveal its fate!</h2>
+        <p style="margin:0.25rem 0 0;" class="text-xs text-gray-400">Glowing borders hint at high-rarity energy inside</p>
+      </div>
+
+      <div id="suspense-cards-grid" class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 my-2 max-h-[62vh] overflow-y-auto px-2 py-3 w-full"></div>
+
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <button id="btn-suspense-flip-all" onclick="revealAllSuspenseCards()" class="px-5 py-2.5 rounded-xl bg-twitch-elevated border border-white/15 text-xs sm:text-sm font-bold text-white shadow-lg">
+          👁️ Reveal All Cards
+        </button>
+        <button id="btn-show-off-pull" onclick="showOffPulledCardsOnStream()" style="border:none;" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-twitch-purple to-pink-600 text-xs sm:text-sm font-extrabold text-white shadow-lg">
+          📡 Show Off on Stream
+        </button>
+        <button onclick="closeSuspenseOverlay()" style="border:none;" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-xs sm:text-sm font-extrabold text-white shadow-lg">
+          📖 Collect to Binder
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- JAVASCRIPT APPLICATION LOGIC                                        -->
+  <!-- =================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      // =========================================================================
+      // 0. OPTIONAL EBS BACKEND CONFIG (Paste your Render/Railway HTTPS URL)
+      // =========================================================================
+      const EBS_BASE_URL = ''; // e.g. 'https://thechimmytcg-ebs.onrender.com'
+      let twitchJwtToken = null;
+      let twitchChannelId = null;
+
+      // =========================================================================
+      // 1. DEFAULT STARTER DECK & STORAGE KEYS
+      // =========================================================================
+      const STORAGE_KEYS = {
+        SETTINGS: 'twitch_tcg_settings_v2',
+        CARDSETS: 'twitch_tcg_cardsets_v2',
+        ACTIVE_SET: 'twitch_tcg_active_set_v2',
+        COLLECTION: 'twitch_tcg_collection_v1',
+        USERS: 'twitch_tcg_users_v2',
+        ACTIVE_USER: 'twitch_tcg_active_user_v2'
+      };
+
+      const RARITY_STYLES = {
+        Common: {
+          badge: 'bg-gray-700/80 text-gray-200 border-gray-500',
+          gradient: 'from-slate-700 to-slate-900',
+          accent: '#9CA3AF',
+          defaultWeight: 50,
+          duplicateChimbles: 10,
+          craftCost: 40
+        },
+        Rare: {
+          badge: 'bg-blue-900/80 text-blue-200 border-blue-400',
+          gradient: 'from-blue-700 to-slate-950',
+          accent: '#3B82F6',
+          defaultWeight: 25,
+          duplicateChimbles: 25,
+          craftCost: 100
+        },
+        Epic: {
+          badge: 'bg-purple-900/80 text-purple-200 border-purple-400',
+          gradient: 'from-purple-700 to-slate-950',
+          accent: '#A855F7',
+          defaultWeight: 12,
+          duplicateChimbles: 60,
+          craftCost: 240
+        },
+        Legendary: {
+          badge: 'bg-amber-900/80 text-amber-200 border-amber-400',
+          gradient: 'from-amber-600 to-stone-950',
+          accent: '#F59E0B',
+          defaultWeight: 5,
+          duplicateChimbles: 150,
+          craftCost: 600
+        },
+        Holographic: {
+          badge: 'bg-pink-900/80 text-pink-200 border-pink-400',
+          gradient: 'from-pink-600 to-cyan-950',
+          accent: '#EC4899',
+          defaultWeight: 2,
+          duplicateChimbles: 300,
+          craftCost: 1200
+        }
+      };
+
+      function getRarityChimbles(rarity) {
+        const style = RARITY_STYLES[rarity] || RARITY_STYLES.Common;
+        return { duplicateChimbles: style.duplicateChimbles, craftCost: style.craftCost };
+      }
+
+      function getRarityPullWeight(rarity) {
+        const style = RARITY_STYLES[rarity] || RARITY_STYLES.Common;
+        return style.defaultWeight || 30;
+      }
+
+      const DEFAULT_CARDS = [
+        { id: 'card_01', name: 'Hydrate Check', rarity: 'Common', emoji: '💧', imageUrl: '', description: 'Chat redeemed Hydrate! Take a sip of water immediately.' },
+        { id: 'card_02', name: 'Lurker in the Shadows', rarity: 'Common', emoji: '👀', imageUrl: '', description: 'Silently supporting the stream from a background tab.' },
+        { id: 'card_03', name: 'First Message Hype', rarity: 'Common', emoji: '👋', imageUrl: '', description: 'Type "hi chat" before anyone else when the stream goes live.' },
+        { id: 'card_04', name: 'VIP Diamond Badge', rarity: 'Rare', emoji: '💎', imageUrl: '', description: 'Recognized pillar of the community with immaculate vibes.' },
+        { id: 'card_05', name: 'Clip That Moment!', rarity: 'Rare', emoji: '🎬', imageUrl: '', description: 'Immortalized an unscripted streamer fail in 1080p 60fps.' },
+        { id: 'card_06', name: 'Hype Train Conductor', rarity: 'Epic', emoji: '🚂', imageUrl: '', description: 'Choo choo! Level 5 Hype Train unlocked by sheer chat chaos.' },
+        { id: 'card_07', name: 'Mod Sword of Justice', rarity: 'Epic', emoji: '⚔️', imageUrl: '', description: 'Protector of chat peace. Bots tremble before the ban hammer.' },
+        { id: 'card_08', name: 'Golden Subathon Crown', rarity: 'Legendary', emoji: '👑', imageUrl: '', description: 'Forged during the legendary 48-hour uncapped subathon.' },
+        { id: 'card_09', name: 'Prismatic Glitch Entity', rarity: 'Holographic', emoji: '🌌', imageUrl: '', description: 'Ultra-rare anomalous card pulsing with pure Twitch energy.' }
+      ];
+
+      // =========================================================================
+      // 2. APPLICATION STATE
+      // =========================================================================
+      let state = {
+        role: 'viewer',
+        activeUser: 'Viewer_1',
+        activeSetId: 'set_series_1',
+        soundEnabled: true,
+        settings: {
+          deckTitle: "Creator's Official Deck",
+          cost1Card: 2000,
+          cost3Cards: 4000
+        },
+        cardsets: [],
+        collection: [],
+        users: {},
+        currentPulledCards: [],
+        binderFilter: 'ALL',
+        binderPage: 1,
+        cardsPerPage: 9,
+        stagedBatchCards: [],
+        globalOverlayQueue: [],
+        isGlobalOverlayPlaying: false
+      };
+
+      let globalOverlayTimer = null;
+
+      function getActiveCardset() {
+        let found = state.cardsets.find(s => s.id === state.activeSetId);
+        if (!found && state.cardsets.length > 0) {
+          found = state.cardsets[0];
+          state.activeSetId = found.id;
+        }
+        return found;
+      }
+
+      function syncActiveCollectionRef() {
+        const activeSet = getActiveCardset();
+        state.collection = activeSet ? activeSet.cards : [];
+      }
+
+      // =========================================================================
+      // 3. WEB AUDIO SYNTHESIZER
+      // =========================================================================
+      const SoundFX = {
+        ctx: null,
+        init() {
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) this.ctx = new AudioCtx();
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+          }
+        },
+        playTone(freq, type = 'sine', duration = 0.15, delay = 0, vol = 0.12) {
+          if (!state.soundEnabled) return;
+          try {
+            this.init();
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime + delay);
+            gain.gain.setValueAtTime(vol, this.ctx.currentTime + delay);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + duration);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(this.ctx.currentTime + delay);
+            osc.stop(this.ctx.currentTime + delay + duration);
+          } catch (e) {}
+        },
+        playPackRip() {
+          this.playTone(220, 'sawtooth', 0.12, 0, 0.1);
+          this.playTone(330, 'triangle', 0.14, 0.07, 0.12);
+          this.playTone(520, 'sine', 0.25, 0.14, 0.15);
+        },
+        playSuspenseBuildup() {
+          this.playTone(75, 'sine', 0.22, 0.0, 0.18);
+          this.playTone(65, 'sine', 0.25, 0.22, 0.14);
+          this.playTone(85, 'sine', 0.22, 0.65, 0.2);
+          this.playTone(70, 'sine', 0.25, 0.87, 0.16);
+          this.playTone(196, 'triangle', 0.35, 1.1, 0.12);
+          this.playTone(293.66, 'triangle', 0.35, 1.3, 0.14);
+          this.playTone(440, 'sawtooth', 0.4, 1.48, 0.12);
+        },
+        playCardFlip(rarity) {
+          if (rarity === 'Holographic' || rarity === 'Legendary') {
+            this.playTone(523.25, 'triangle', 0.2, 0, 0.15);
+            this.playTone(659.25, 'triangle', 0.2, 0.08, 0.15);
+            this.playTone(783.99, 'triangle', 0.25, 0.16, 0.16);
+            this.playTone(1046.5, 'sine', 0.45, 0.24, 0.18);
+          } else if (rarity === 'Epic' || rarity === 'Rare') {
+            this.playTone(440, 'triangle', 0.18, 0, 0.12);
+            this.playTone(659.25, 'sine', 0.28, 0.09, 0.14);
+          } else {
+            this.playTone(392, 'sine', 0.14, 0, 0.1);
+          }
+        }
+      };
+
+      // =========================================================================
+      // 4. STORAGE & USER BINDER HELPERS
+      // =========================================================================
+      function loadState() {
+        try {
+          const savedSettings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS));
+          if (savedSettings) state.settings = { ...state.settings, ...savedSettings };
+
+          const savedCardsets = JSON.parse(localStorage.getItem(STORAGE_KEYS.CARDSETS));
+          if (Array.isArray(savedCardsets) && savedCardsets.length > 0) {
+            state.cardsets = savedCardsets;
+          } else {
+            state.cardsets = [{
+              id: 'set_series_1',
+              name: 'Series 1: Stream Legends',
+              badgeName: 'Series 1 Champion',
+              badgeEmoji: '🏆',
+              pullable: true,
+              cards: JSON.parse(JSON.stringify(DEFAULT_CARDS))
+            }];
+          }
+
+          state.cardsets.forEach(s => {
+            if (typeof s.pullable !== 'boolean') s.pullable = true;
+          });
+
+          const savedActiveSet = localStorage.getItem(STORAGE_KEYS.ACTIVE_SET);
+          state.activeSetId = (savedActiveSet && state.cardsets.some(s => s.id === savedActiveSet))
+            ? savedActiveSet
+            : state.cardsets[0].id;
+          syncActiveCollectionRef();
+
+          const savedUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS));
+          if (savedUsers) state.users = savedUsers;
+
+          const savedActiveUser = localStorage.getItem(STORAGE_KEYS.ACTIVE_USER);
+          if (savedActiveUser) state.activeUser = savedActiveUser;
+        } catch (e) {
+          state.cardsets = [{
+            id: 'set_series_1',
+            name: 'Series 1: Stream Legends',
+            badgeName: 'Series 1 Champion',
+            badgeEmoji: '🏆',
+            pullable: true,
+            cards: JSON.parse(JSON.stringify(DEFAULT_CARDS))
+          }];
+          state.activeSetId = 'set_series_1';
+          syncActiveCollectionRef();
+        }
+
+        ensureUserProfile(state.activeUser);
+        populateUserDropdown();
+        updateStorageMeter();
+      }
+
+      function saveState() {
+        try {
+          const activeSet = getActiveCardset();
+          if (activeSet) activeSet.cards = state.collection;
+          localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(state.settings));
+          localStorage.setItem(STORAGE_KEYS.CARDSETS, JSON.stringify(state.cardsets));
+          localStorage.setItem(STORAGE_KEYS.ACTIVE_SET, state.activeSetId);
+          localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(state.users));
+          localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, state.activeUser);
+          updateStorageMeter();
+          return true;
+        } catch (e) {
+          showToast('Browser storage limit reached!', 'error');
+          return false;
+        }
+      }
+
+      function updateStorageMeter() {
+        const labelEl = document.getElementById('storage-usage-label');
+        const barEl = document.getElementById('storage-usage-bar');
+        if (!labelEl || !barEl) return;
+        try {
+          let totalBytes = 0;
+          Object.values(STORAGE_KEYS).forEach(key => {
+            const val = localStorage.getItem(key);
+            if (val) totalBytes += val.length * 2;
+          });
+          const pct = Math.min(100, Math.max(1, Math.round((totalBytes / (5 * 1024 * 1024)) * 100)));
+          labelEl.textContent = `${(totalBytes / 1024).toFixed(0)} KB (${pct}%)`;
+          barEl.style.width = `${pct}%`;
+        } catch (e) {}
+      }
+
+      function ensureUserProfile(username) {
+        if (!state.users[username]) {
+          state.users[username] = {
+            points: 6000,
+            chimbles: 0,
+            giftedPacks: [],
+            earnedBadges: [],
+            binder: {}
+          };
+        }
+        if (typeof state.users[username].chimbles !== 'number') state.users[username].chimbles = 0;
+        if (!Array.isArray(state.users[username].giftedPacks)) state.users[username].giftedPacks = [];
+        if (!Array.isArray(state.users[username].earnedBadges)) state.users[username].earnedBadges = [];
+      }
+
+      function checkAndAwardSetBadges(username) {
+        const user = state.users[username];
+        if (!user) return;
+        let newlyAwarded = null;
+        state.cardsets.forEach(set => {
+          if (!set.cards || set.cards.length === 0) return;
+          const allOwned = set.cards.every(c => user.binder[c.id] && user.binder[c.id].count > 0);
+          if (allOwned && !user.earnedBadges.includes(set.id)) {
+            user.earnedBadges.push(set.id);
+            newlyAwarded = set;
+          }
+        });
+        if (newlyAwarded) {
+          SoundFX.playCardFlip('Holographic');
+          showToast(`🏅 SET COMPLETE! Unlocked "${newlyAwarded.badgeEmoji} ${newlyAwarded.badgeName}" badge!`, 'success');
+        }
+      }
+
+      function grantTestChannelPoints(amount) {
+        const user = state.users[state.activeUser];
+        user.points = (user.points || 0) + amount;
+        saveState();
+        updateViewerHeaderUI();
+        if (state.role === 'twitch-preview') renderTwitchStreamPreview();
+        showToast(`Added +${amount.toLocaleString()} Channel Points!`, 'success');
+      }
+
+      function populateUserDropdown() {
+        const select = document.getElementById('viewer-select');
+        const defaultNames = ['Viewer_1', 'Viewer_2', 'NightbotVIP', 'ChatterBox99'];
+        const allNames = Array.from(new Set([...defaultNames, ...Object.keys(state.users)]));
+        select.innerHTML = allNames.map(name => {
+          const giftCount = state.users[name]?.giftedPacks?.length || 0;
+          const giftLabel = giftCount > 0 ? ` 🎁(${giftCount})` : '';
+          return `<option value="${escapeHTML(name)}" class="bg-twitch-panel" ${name === state.activeUser ? 'selected' : ''}>${escapeHTML(name)}${giftLabel}</option>`;
+        }).join('');
+
+        const datalist = document.getElementById('gift-viewer-datalist');
+        if (datalist) {
+          datalist.innerHTML = allNames.map(name => `<option value="${escapeHTML(name)}"></option>`).join('');
+        }
+      }
+
+      // =========================================================================
+      // 5. WEIGHTED RNG CARD PULL ENGINE
+      // =========================================================================
+      function rollSingleCard() {
+        if (!state.collection.length) return null;
+        const totalWeight = state.collection.reduce((sum, c) => sum + getRarityPullWeight(c.rarity), 0);
+        let roll = Math.random() * totalWeight;
+        for (const card of state.collection) {
+          roll -= getRarityPullWeight(card.rarity);
+          if (roll <= 0) return card;
+        }
+        return state.collection[state.collection.length - 1];
+      }
+
+      function openPack(mode) {
+        syncActiveCollectionRef();
+        const activeSet = getActiveCardset();
+        if (state.collection.length === 0) {
+          showToast('No cards in this cardset!', 'error');
+          return;
+        }
+
+        if (mode !== 'gift' && activeSet && activeSet.pullable === false) {
+          showToast(`"${activeSet.name}" is vaulted from pack pulls!`, 'warning');
+          return;
+        }
+
+        const user = state.users[state.activeUser];
+        const now = Date.now();
+        let claimedGift = null;
+        let pullCount = 3;
+
+        if (mode === 'gift') {
+          if (!user.giftedPacks || user.giftedPacks.length === 0) {
+            showToast('No gifted packs available.', 'warning');
+            return;
+          }
+          claimedGift = user.giftedPacks.shift();
+        } else if (mode === 'points_1') {
+          const cost = Number(state.settings.cost1Card) || 2000;
+          if (user.points < cost) {
+            showToast(`Not enough Channel Points! Need ${cost.toLocaleString()} pts.`, 'error');
+            return;
+          }
+          user.points -= cost;
+          pullCount = 1;
+        } else if (mode === 'points_3') {
+          const cost = Number(state.settings.cost3Cards) || 4000;
+          if (user.points < cost) {
+            showToast(`Not enough Channel Points! Need ${cost.toLocaleString()} pts.`, 'error');
+            return;
+          }
+          user.points -= cost;
+          pullCount = 3;
+        }
+
+        SoundFX.playPackRip();
+
+        const pulled = [];
+        if (claimedGift && claimedGift.type === 'guaranteed') {
+          let targetCard = null;
+          for (const set of state.cardsets) {
+            const found = set.cards.find(c => c.id === claimedGift.cardId);
+            if (found) { targetCard = found; break; }
+          }
+          pulled.push(targetCard || rollSingleCard());
+        } else {
+          for (let i = 0; i < pullCount; i++) {
+            const card = rollSingleCard();
+            if (card) pulled.push(card);
+          }
+        }
+
+        let totalChimblesEarned = 0;
+        state.currentPulledCards = pulled.map((card, idx) => {
+          const existing = user.binder[card.id];
+          const isNew = !existing;
+          let chimblesGained = 0;
+
+          if (isNew) {
+            user.binder[card.id] = { count: 1, firstPulledAt: now };
+          } else {
+            user.binder[card.id].count += 1;
+            chimblesGained = getRarityChimbles(card.rarity).duplicateChimbles;
+            user.chimbles = (user.chimbles || 0) + chimblesGained;
+            totalChimblesEarned += chimblesGained;
+          }
+
+          return { pullIndex: idx, card, isNew, chimblesGained, flipped: false };
+        });
+
+        checkAndAwardSetBadges(state.activeUser);
+        saveState();
+        populateUserDropdown();
+        updateViewerHeaderUI();
+        renderBinder();
+        if (state.role === 'broadcaster') renderBroadcasterDashboard();
+        if (state.role === 'twitch-preview') renderTwitchStreamPreview();
+        launchSuspensePullOverlay(state.currentPulledCards);
+
+        if (totalChimblesEarned > 0) {
+          showToast(`Duplicate cards converted into +${totalChimblesEarned} Chimbles!`, 'info');
+        }
+      }
+
+      // =========================================================================
+      // 6. SUSPENSEFUL CARD PULL OVERLAY
+      // =========================================================================
+      let suspenseChargeTimer = null;
+      let suspenseTearTimer = null;
+
+      function getHighestRarityInPull(pulledItems) {
+        const order = ['Common', 'Rare', 'Epic', 'Legendary', 'Holographic'];
+        let maxIdx = 0;
+        pulledItems.forEach(item => {
+          const idx = order.indexOf(item.card.rarity);
+          if (idx > maxIdx) maxIdx = idx;
+        });
+        return order[maxIdx];
+      }
+
+      function launchSuspensePullOverlay(pulledItems) {
+        const overlay = document.getElementById('suspense-pull-overlay');
+        const packStage = document.getElementById('suspense-pack-stage');
+        const cardsStage = document.getElementById('suspense-cards-stage');
+        const packWrapper = document.getElementById('suspense-pack-wrapper');
+        const packAura = document.getElementById('suspense-pack-aura');
+        const ambientGlow = document.getElementById('suspense-ambient-glow');
+        const statusText = document.getElementById('suspense-status-text');
+        const chargeBar = document.getElementById('suspense-charge-bar');
+        const flashLayer = document.getElementById('suspense-flash-layer');
+
+        if (!overlay || !packStage || !cardsStage) return;
+
+        clearTimeout(suspenseChargeTimer);
+        clearTimeout(suspenseTearTimer);
+
+        const topRarity = getHighestRarityInPull(pulledItems);
+        const rarityStyle = RARITY_STYLES[topRarity] || RARITY_STYLES.Common;
+
+        document.getElementById('suspense-viewer-tag').textContent = `${state.activeUser}'s Pull`;
+        document.getElementById('suspense-pack-count').textContent = `${pulledItems.length} CARD${pulledItems.length > 1 ? 'S' : ''}`;
+
+        overlay.classList.remove('hidden');
+        packStage.classList.remove('hidden');
+        cardsStage.classList.add('hidden');
+        cardsStage.classList.remove('flex');
+        flashLayer.classList.add('hidden');
+
+        packAura.style.backgroundColor = 'rgba(145, 70, 255, 0.55)';
+        ambientGlow.style.backgroundColor = 'rgba(145, 70, 255, 0.25)';
+        statusText.textContent = 'Detecting card signatures...';
+        chargeBar.style.width = '15%';
+
+        packWrapper.classList.remove('animate-suspense-charge');
+        void packWrapper.offsetWidth;
+        packWrapper.classList.add('animate-suspense-charge');
+
+        SoundFX.playSuspenseBuildup();
+
+        suspenseChargeTimer = setTimeout(() => {
+          chargeBar.style.width = '78%';
+          packAura.style.backgroundColor = rarityStyle.accent;
+          ambientGlow.style.backgroundColor = `${rarityStyle.accent}44`;
+          if (topRarity === 'Holographic' || topRarity === 'Legendary') {
+            statusText.textContent = '⚠️ MASSIVE ENERGY SURGE DETECTED!!';
+          } else if (topRarity === 'Epic' || topRarity === 'Rare') {
+            statusText.textContent = '✨ High-rarity aura resonating inside...';
+          } else {
+            statusText.textContent = 'Breaking the booster seal...';
+          }
+        }, 850);
+
+        suspenseTearTimer = setTimeout(() => {
+          chargeBar.style.width = '100%';
+          flashLayer.classList.remove('hidden');
+          flashLayer.classList.remove('animate-screen-flash');
+          void flashLayer.offsetWidth;
+          flashLayer.classList.add('animate-screen-flash');
+
+          SoundFX.playPackRip();
+          packStage.classList.add('hidden');
+          cardsStage.classList.remove('hidden');
+          cardsStage.classList.add('flex');
+
+          const hintEl = document.getElementById('suspense-rarity-hint');
+          if (topRarity === 'Holographic' || topRarity === 'Legendary') {
+            hintEl.textContent = `🔥 ${topRarity.toUpperCase()} SIGNAL INSIDE!`;
+            hintEl.style.borderColor = rarityStyle.accent;
+            hintEl.style.color = '#FDE68A';
+          } else if (topRarity === 'Epic' || topRarity === 'Rare') {
+            hintEl.textContent = `✨ ${topRarity.toUpperCase()} PULL DETECTED`;
+            hintEl.style.borderColor = rarityStyle.accent;
+            hintEl.style.color = '#E9D5FF';
+          } else {
+            hintEl.textContent = 'Mystery Pulls Ready';
+            hintEl.style.borderColor = 'rgba(255,255,255,0.15)';
+            hintEl.style.color = '#E9D5FF';
+          }
+
+          renderSuspenseCardsGrid();
+        }, 1650);
+      }
+
+      function renderSuspenseCardsGrid() {
+        const grid = document.getElementById('suspense-cards-grid');
+        if (!grid) return;
+
+        grid.innerHTML = state.currentPulledCards.map((item, idx) => {
+          const { card, isNew, chimblesGained, flipped } = item;
+          const style = RARITY_STYLES[card.rarity] || RARITY_STYLES.Common;
+          const isHighRarity = ['Rare', 'Epic', 'Legendary', 'Holographic'].includes(card.rarity);
+          const mysteryGlowStyle = isHighRarity
+            ? `box-shadow: 0 0 28px ${style.accent}88; border-color: ${style.accent};`
+            : '';
+
+          return `
+            <div onclick="flipPulledCard(${idx})" style="animation-delay: ${idx * 120}ms" class="animate-card-deal perspective-1000 w-44 sm:w-52 h-64 sm:h-72 cursor-pointer group">
+              <div class="relative w-full h-full preserve-3d transition-transform duration-700 ${flipped ? 'rotate-y-180' : ''}">
+                <div style="${mysteryGlowStyle}" class="backface-hidden absolute inset-0 rounded-2xl bg-gradient-to-br from-[#1f1736] to-[#1e1633] border-2 border-twitch-purple/60 shadow-2xl flex flex-col items-center justify-center p-4 overflow-hidden">
+                  ${isHighRarity ? `<div class="holo-foil absolute inset-0 opacity-40 pointer-events-none"></div>` : ''}
+                  <div class="w-16 h-16 rounded-full bg-twitch-purple/25 border border-twitch-purple/60 flex items-center justify-center mb-3 relative z-10 text-2xl">
+                    🃏
+                  </div>
+                  <span class="text-xs font-black uppercase tracking-widest text-purple-200 z-10">Tap to Reveal</span>
+                  <span class="text-[11px] text-gray-400 mt-1 z-10">Card #${idx + 1}</span>
+                </div>
+
+                <div class="backface-hidden rotate-y-180 absolute inset-0 rounded-2xl border-2 rarity-${card.rarity} bg-gradient-to-b ${style.gradient} p-3 flex flex-col justify-between overflow-hidden shadow-2xl">
+                  ${card.rarity === 'Holographic' || card.rarity === 'Legendary' ? '<div class="holo-foil absolute inset-0 pointer-events-none z-10"></div>' : ''}
+                  <div class="flex items-center justify-between gap-1 z-20">
+                    <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${style.badge}">
+                      ${card.rarity}
+                    </span>
+                    ${isNew
+                      ? '<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500 text-twitch-dark shadow">NEW!</span>'
+                      : `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-950/90 text-cyan-300 border border-cyan-500/50">+${chimblesGained} 💎</span>`
+                    }
+                  </div>
+                  <div class="my-2 flex-1 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden relative z-20">
+                    ${renderCardArtwork(card, 'text-5xl sm:text-6xl')}
+                  </div>
+                  <div class="z-20 text-left">
+                    <div class="font-bold text-xs sm:text-sm text-white truncate">${escapeHTML(card.name)}</div>
+                    <p style="margin:0.15rem 0 0;" class="text-[10px] text-gray-300 line-clamp-2 leading-tight">${escapeHTML(card.description || 'Official Stream Collectible')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        const allFlipped = state.currentPulledCards.every(item => item.flipped);
+        const flipAllBtn = document.getElementById('btn-suspense-flip-all');
+        if (flipAllBtn) flipAllBtn.classList.toggle('hidden', allFlipped);
+      }
+
+      function flipPulledCard(index) {
+        const item = state.currentPulledCards[index];
+        if (!item || item.flipped) return;
+        item.flipped = true;
+        SoundFX.playCardFlip(item.card.rarity);
+        renderSuspenseCardsGrid();
+        collectPulledCards();
+      }
+
+      function revealAllSuspenseCards() {
+        state.currentPulledCards.forEach((item, i) => {
+          if (!item.flipped) {
+            setTimeout(() => {
+              item.flipped = true;
+              SoundFX.playCardFlip(item.card.rarity);
+              renderSuspenseCardsGrid();
+              collectPulledCards();
+            }, i * 160);
+          }
+        });
+      }
+
+      function closeSuspenseOverlay() {
+        clearTimeout(suspenseChargeTimer);
+        clearTimeout(suspenseTearTimer);
+        const overlay = document.getElementById('suspense-pull-overlay');
+        if (overlay) overlay.classList.add('hidden');
+        collectPulledCards();
+      }
+
+      function collectPulledCards() {
+        const revealed = state.currentPulledCards.filter(i => i.flipped);
+        if (revealed.length > 0 && state.role === 'twitch-preview') {
+          const latest = revealed[revealed.length - 1];
+          logLivePullFeed(state.activeUser, latest.card, latest.isNew, latest.chimblesGained);
+        }
+      }
+
+      function logLivePullFeed(username, card, isNew, chimblesGained) {
+        if (!card) return;
+        const chatBox = document.getElementById('simulated-twitch-chat');
+        if (chatBox) {
+          const msg = document.createElement('div');
+          msg.className = 'animate-pop-in';
+          const statusTag = isNew
+            ? '<span class="text-emerald-400 font-semibold">[NEW!]</span>'
+            : `<span class="text-cyan-400 font-semibold">[+${chimblesGained || 0} Chimbles]</span>`;
+          msg.innerHTML = `<span class="font-bold text-twitch-accent">${escapeHTML(username)}:</span> <span class="text-gray-300">pulled</span> <strong class="text-white">${escapeHTML(card.name)}</strong> <span class="text-[10px] text-amber-300">[${card.rarity}]</span> ${statusTag}`;
+          chatBox.appendChild(msg);
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }
+      }
+
+      // =========================================================================
+      // 6B. GLOBAL STREAM OVERLAY SHOW-OFF QUEUE (FIFO)
+      // =========================================================================
+      function enqueueGlobalStreamShowOff(username, card, switchToStreamView = false) {
+        if (!card) return;
+        state.globalOverlayQueue.push({
+          id: 'showcase_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          username,
+          card
+        });
+
+        if (switchToStreamView && state.role !== 'twitch-preview') {
+          switchRole('twitch-preview');
+        }
+
+        updateGlobalOverlayQueueBadge();
+        if (!state.isGlobalOverlayPlaying) {
+          playNextGlobalStreamShowOff();
+        }
+      }
+
+      function updateGlobalOverlayQueueBadge() {
+        const badge = document.getElementById('global-overlay-queue-badge');
+        if (!badge) return;
+        const waitingCount = state.globalOverlayQueue.length;
+        if (waitingCount > 0) {
+          badge.classList.remove('hidden');
+          badge.textContent = `+${waitingCount} in queue`;
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+
+      function playNextGlobalStreamShowOff() {
+        const stage = document.getElementById('global-stream-overlay-stage');
+        if (!stage) return;
+
+        if (state.globalOverlayQueue.length === 0) {
+          state.isGlobalOverlayPlaying = false;
+          stage.classList.add('hidden');
+          return;
+        }
+
+        state.isGlobalOverlayPlaying = true;
+        const item = state.globalOverlayQueue.shift();
+        const { username, card } = item;
+        const style = RARITY_STYLES[card.rarity] || RARITY_STYLES.Common;
+
+        const cardBox = document.getElementById('global-overlay-card-box');
+        const holoEl = document.getElementById('global-overlay-holo');
+        const artEl = document.getElementById('global-overlay-art');
+        const viewerEl = document.getElementById('global-overlay-viewer');
+        const nameEl = document.getElementById('global-overlay-card-name');
+        const rarityEl = document.getElementById('global-overlay-rarity');
+        const timerBar = document.getElementById('global-overlay-timer-bar');
+
+        cardBox.className = `bg-twitch-panel/95 backdrop-blur-xl border-2 rarity-${card.rarity} rounded-2xl p-3 shadow-2xl animate-pop-in relative overflow-hidden`;
+        holoEl.classList.toggle('hidden', !(card.rarity === 'Holographic' || card.rarity === 'Legendary'));
+        artEl.className = `w-14 aspect-[3/4] rounded-xl border border-white/20 bg-gradient-to-b ${style.gradient} flex items-center justify-center overflow-hidden flex-shrink-0`;
+        artEl.innerHTML = renderCardArtwork(card, 'text-2xl');
+        viewerEl.textContent = username;
+        nameEl.textContent = card.name;
+        rarityEl.className = `text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded border ${style.badge}`;
+        rarityEl.textContent = card.rarity;
+
+        updateGlobalOverlayQueueBadge();
+        stage.classList.remove('hidden');
+        SoundFX.playCardFlip(card.rarity);
+
+        timerBar.style.transition = 'none';
+        timerBar.style.width = '100%';
+        void timerBar.offsetWidth;
+        timerBar.style.transition = 'width 4000ms linear';
+        timerBar.style.width = '0%';
+
+        clearTimeout(globalOverlayTimer);
+        globalOverlayTimer = setTimeout(() => {
+          playNextGlobalStreamShowOff();
+        }, 4100);
+      }
+
+      function showOffPulledCardsOnStream() {
+        if (!state.currentPulledCards || state.currentPulledCards.length === 0) return;
+        state.currentPulledCards.forEach(item => { item.flipped = true; });
+        const order = ['Common', 'Rare', 'Epic', 'Legendary', 'Holographic'];
+        const bestItem = [...state.currentPulledCards].sort(
+          (a, b) => order.indexOf(b.card.rarity) - order.indexOf(a.card.rarity)
+        )[0];
+
+        closeSuspenseOverlay();
+        enqueueGlobalStreamShowOff(state.activeUser, bestItem.card, true);
+        showToast(`Broadcasting ${state.activeUser}'s ${bestItem.card.name} to the stream overlay!`, 'success');
+      }
+
+      function showOffOwnedCardFromModal(cardId) {
+        let card = null;
+        for (const set of state.cardsets) {
+          const found = set.cards.find(c => c.id === cardId);
+          if (found) { card = found; break; }
+        }
+        if (!card) return;
+        closeCardDetailModal();
+        enqueueGlobalStreamShowOff(state.activeUser, card, true);
+      }
+
+      function simulateSimultaneousShowOffs() {
+        const pool = state.collection.length > 0 ? state.collection : DEFAULT_CARDS;
+        const cardA = pool[Math.floor(Math.random() * pool.length)];
+        const cardB = pool[(pool.indexOf(cardA) + 1) % pool.length];
+        enqueueGlobalStreamShowOff('Viewer_1', cardA, false);
+        enqueueGlobalStreamShowOff('NightbotVIP', cardB, false);
+        showToast('Queued 2 simultaneous viewer show-offs!', 'info');
+      }
+
+      // =========================================================================
+      // 7. USER-SPECIFIC COLLECTOR BINDER & CHIMBLES CRAFTING
+      // =========================================================================
+      function purchaseUncollectedCard(cardId) {
+        let card = null;
+        for (const set of state.cardsets) {
+          const found = set.cards.find(c => c.id === cardId);
+          if (found) { card = found; break; }
+        }
+        if (!card) return;
+
+        const user = state.users[state.activeUser];
+        if (user.binder[cardId] && user.binder[cardId].count > 0) return;
+
+        const { craftCost } = getRarityChimbles(card.rarity);
+        if ((user.chimbles || 0) < craftCost) {
+          showToast(`Need ${craftCost} Chimbles to unlock ${card.name} (you have ${user.chimbles || 0}).`, 'error');
+          return;
+        }
+
+        user.chimbles -= craftCost;
+        user.binder[cardId] = { count: 1, firstPulledAt: Date.now() };
+        checkAndAwardSetBadges(state.activeUser);
+        saveState();
+
+        SoundFX.playCardFlip(card.rarity);
+        updateViewerHeaderUI();
+        renderBinder();
+        if (state.role === 'twitch-preview') renderTwitchStreamPreview();
+        showToast(`Unlocked "${card.name}" for ${craftCost} Chimbles!`, 'success');
+      }
+
+      function renderBinder() {
+        syncActiveCollectionRef();
+        const user = state.users[state.activeUser];
+        const activeSet = getActiveCardset();
+        const totalCards = state.collection.length;
+        const ownedCount = state.collection.filter(c => user.binder[c.id]?.count > 0).length;
+        const pct = totalCards > 0 ? Math.round((ownedCount / totalCards) * 100) : 0;
+
+        const tabsContainer = document.getElementById('viewer-cardset-tabs');
+        if (tabsContainer) {
+          tabsContainer.innerHTML = state.cardsets.map(set => {
+            const isActive = set.id === state.activeSetId;
+            const setOwned = set.cards.filter(c => user.binder[c.id]?.count > 0).length;
+            const isCompleted = set.cards.length > 0 && setOwned === set.cards.length;
+            const isVaulted = set.pullable === false;
+            return `
+              <div class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 whitespace-nowrap ${
+                isActive ? 'bg-twitch-purple text-white shadow' : 'bg-twitch-dark text-gray-400 border border-twitch-border'
+              }">
+                <span>${escapeHTML(set.badgeEmoji || '🃏')}</span>
+                <span>${escapeHTML(set.name)}</span>
+                <span class="text-[10px] opacity-80">(${setOwned}/${set.cards.length})</span>
+                ${isVaulted ? '<span class="text-[9px] uppercase px-1.5 rounded bg-cyan-950/90 text-cyan-300 border border-cyan-500/40">Vaulted</span>' : ''}
+                ${isCompleted ? '<span>✅</span>' : ''}
+              </div>
+            `;
+          }).join('');
+        }
+
+        const setBanner = document.getElementById('active-set-badge-banner');
+        if (setBanner && activeSet) {
+          const isSetComplete = totalCards > 0 && ownedCount === totalCards;
+          setBanner.innerHTML = isSetComplete
+            ? `<span class="text-base">${escapeHTML(activeSet.badgeEmoji || '🏆')}</span><span class="font-bold text-emerald-400">Badge Unlocked: ${escapeHTML(activeSet.badgeName || 'Set Master')}</span>`
+            : `<span class="text-base opacity-60">${escapeHTML(activeSet.badgeEmoji || '🏆')}</span><span class="text-gray-400">100% Reward: <strong class="text-gray-200">${escapeHTML(activeSet.badgeName || 'Set Master')}</strong></span>`;
+        }
+
+        const headingEl = document.getElementById('binder-set-heading');
+        if (headingEl && activeSet) headingEl.textContent = activeSet.name;
+
+        const compTextEl = document.getElementById('binder-completion-text');
+        if (compTextEl) compTextEl.textContent = `${ownedCount} / ${totalCards} (${pct}%)`;
+        const compBarEl = document.getElementById('binder-completion-bar');
+        if (compBarEl) compBarEl.style.width = `${pct}%`;
+
+        const badgesListEl = document.getElementById('viewer-earned-badges-list');
+        const badgesCountEl = document.getElementById('earned-badges-count');
+        const earnedSetIds = user.earnedBadges || [];
+        if (badgesCountEl) badgesCountEl.textContent = earnedSetIds.length;
+        if (badgesListEl) {
+          if (earnedSetIds.length === 0) {
+            badgesListEl.innerHTML = `<div class="text-xs text-gray-500 italic">Collect 100% of any cardset to unlock its badge!</div>`;
+          } else {
+            badgesListEl.innerHTML = earnedSetIds.map(setId => {
+              const setObj = state.cardsets.find(s => s.id === setId);
+              if (!setObj) return '';
+              return `
+                <div class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/50 flex items-center gap-1.5 text-xs font-bold text-amber-200 shadow-sm">
+                  <span class="text-base">${escapeHTML(setObj.badgeEmoji || '🏆')}</span>
+                  <span>${escapeHTML(setObj.badgeName || setObj.name)}</span>
+                </div>
+              `;
+            }).join('');
+          }
+        }
+
+        const rarityFilter = document.getElementById('binder-rarity-filter').value;
+        const filteredCards = state.collection.filter(card => {
+          const isOwned = (user.binder[card.id]?.count || 0) > 0;
+          if (state.binderFilter === 'OWNED' && !isOwned) return false;
+          if (state.binderFilter === 'MISSING' && isOwned) return false;
+          if (rarityFilter !== 'ALL' && card.rarity !== rarityFilter) return false;
+          return true;
+        });
+
+        const totalPages = Math.max(1, Math.ceil(filteredCards.length / state.cardsPerPage));
+        if (state.binderPage > totalPages) state.binderPage = totalPages;
+
+        document.getElementById('binder-page-indicator').textContent = `Page ${state.binderPage} / ${totalPages}`;
+        document.getElementById('btn-prev-page').disabled = state.binderPage <= 1;
+        document.getElementById('btn-next-page').disabled = state.binderPage >= totalPages;
+
+        const startIdx = (state.binderPage - 1) * state.cardsPerPage;
+        const pageSlice = filteredCards.slice(startIdx, startIdx + state.cardsPerPage);
+
+        const slots = [...pageSlice];
+        while (slots.length < state.cardsPerPage) slots.push(null);
+
+        const grid = document.getElementById('binder-grid');
+        grid.innerHTML = slots.map((card, slotIdx) => {
+          const slotNumber = startIdx + slotIdx + 1;
+          if (!card) {
+            return `
+              <div class="aspect-[3/4] rounded-xl border border-dashed border-gray-800 bg-black/25 flex flex-col items-center justify-center text-gray-700 select-none">
+                <span class="text-xs font-mono">#${String(slotNumber).padStart(2, '0')}</span>
+                <span class="text-[10px] mt-1">Empty Pocket</span>
+              </div>
+            `;
+          }
+
+          const ownedEntry = user.binder[card.id];
+          const isOwned = ownedEntry && ownedEntry.count > 0;
+          const style = RARITY_STYLES[card.rarity] || RARITY_STYLES.Common;
+          const { craftCost } = getRarityChimbles(card.rarity);
+          const canAfford = (user.chimbles || 0) >= craftCost;
+
+          if (!isOwned) {
+            return `
+              <div onclick="openCardDetailModal('${card.id}')" class="aspect-[3/4] rounded-xl border border-gray-800 bg-twitch-dark/80 p-2.5 flex flex-col justify-between relative overflow-hidden cursor-pointer transition">
+                <div class="flex items-center justify-between text-[10px] text-gray-500 font-mono">
+                  <span>#${String(slotNumber).padStart(2, '0')}</span>
+                  <span>${card.rarity}</span>
+                </div>
+                <div class="my-auto flex flex-col items-center text-center px-1">
+                  <div class="w-11 h-11 rounded-full bg-gray-900 border border-gray-800 flex items-center justify-center mb-1.5 text-sm">
+                    🔒
+                  </div>
+                  <div class="text-xs font-bold text-gray-400 line-clamp-1">${escapeHTML(card.name)}</div>
+                  <span class="text-[9px] uppercase tracking-wider text-gray-600 mt-0.5">Uncollected</span>
+                </div>
+                <button
+                  type="button"
+                  onclick="event.stopPropagation(); purchaseUncollectedCard('${card.id}')"
+                  class="w-full py-1.5 px-2 rounded-lg text-[10px] font-extrabold flex items-center justify-center gap-1 transition ${
+                    canAfford
+                      ? 'bg-cyan-600/25 text-cyan-200 border border-cyan-500/50'
+                      : 'bg-gray-900 text-gray-500 border border-gray-800'
+                  }"
+                >
+                  <span>💎 Unlock (${craftCost})</span>
+                </button>
+              </div>
+            `;
+          }
+
+          return `
+            <div onclick="openCardDetailModal('${card.id}')" class="aspect-[3/4] rounded-xl border-2 rarity-${card.rarity} bg-gradient-to-b ${style.gradient} p-2.5 flex flex-col justify-between relative overflow-hidden cursor-pointer hover:-translate-y-1 transition-all">
+              ${card.rarity === 'Holographic' || card.rarity === 'Legendary' ? '<div class="holo-foil absolute inset-0 pointer-events-none z-10"></div>' : ''}
+              <div class="binder-sleeve absolute inset-0 pointer-events-none z-20"></div>
+
+              <div class="flex items-center justify-between gap-1 z-30">
+                <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded border ${style.badge}">
+                  ${card.rarity}
+                </span>
+                ${ownedEntry.count > 1
+                  ? `<span class="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-black/75 text-amber-300 border border-amber-400/40">x${ownedEntry.count}</span>`
+                  : `<span class="text-[10px] font-mono text-white/60">#${String(slotNumber).padStart(2, '0')}</span>`
+                }
+              </div>
+
+              <div class="my-1.5 flex-1 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden relative z-30">
+                ${renderCardArtwork(card, 'text-4xl sm:text-5xl')}
+              </div>
+
+              <div class="z-30">
+                <div class="font-bold text-xs text-white truncate">${escapeHTML(card.name)}</div>
+                <div class="text-[10px] text-gray-300 truncate">${escapeHTML(card.description || 'Collector Edition')}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function setBinderFilter(filter) {
+        state.binderFilter = filter;
+        state.binderPage = 1;
+        document.querySelectorAll('.binder-filter-btn').forEach(btn => {
+          if (btn.dataset.filter === filter) {
+            btn.className = 'binder-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-twitch-purple text-white transition';
+            btn.style.border = 'none';
+          } else {
+            btn.className = 'binder-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-twitch-dark text-gray-400 hover:text-white border border-twitch-border transition';
+            btn.style.border = '1px solid #2F2F35';
+          }
+        });
+        renderBinder();
+      }
+
+      function changeBinderPage(delta) {
+        state.binderPage += delta;
+        renderBinder();
+      }
+
+      function openCardDetailModal(cardId) {
+        const card = state.collection.find(c => c.id === cardId);
+        if (!card) return;
+        const user = state.users[state.activeUser];
+        const ownedEntry = user.binder[card.id];
+        const isOwned = ownedEntry && ownedEntry.count > 0;
+        const style = RARITY_STYLES[card.rarity] || RARITY_STYLES.Common;
+        const { duplicateChimbles, craftCost } = getRarityChimbles(card.rarity);
+        const canAfford = (user.chimbles || 0) >= craftCost;
+
+        const content = document.getElementById('card-detail-content');
+        content.innerHTML = isOwned
+          ? `
+            <div class="w-56 sm:w-64 aspect-[3/4] rounded-2xl border-2 rarity-${card.rarity} bg-gradient-to-b ${style.gradient} p-4 flex flex-col justify-between relative overflow-hidden shadow-2xl mb-4">
+              ${card.rarity === 'Holographic' || card.rarity === 'Legendary' ? '<div class="holo-foil absolute inset-0 pointer-events-none z-10"></div>' : ''}
+              <div class="flex items-center justify-between z-20">
+                <span class="text-xs font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${style.badge}">${card.rarity}</span>
+                <span class="text-xs font-bold text-white">Owned: x${ownedEntry.count}</span>
+              </div>
+              <div class="my-3 flex-1 rounded-xl bg-black/45 border border-white/15 flex items-center justify-center overflow-hidden z-20">
+                ${renderCardArtwork(card, 'text-7xl')}
+              </div>
+              <div class="z-20">
+                <h4 style="margin:0;" class="font-display font-black text-base text-white leading-snug">${escapeHTML(card.name)}</h4>
+                <p style="margin:0.25rem 0 0;" class="text-xs text-gray-200 leading-relaxed">${escapeHTML(card.description || 'Official Twitch Channel Collectible')}</p>
+              </div>
+            </div>
+            <div class="w-full bg-twitch-dark border border-twitch-border rounded-xl p-3 text-xs text-gray-300 flex items-center justify-between mb-3">
+              <span>Duplicate Value: <strong class="text-cyan-400">+${duplicateChimbles} Chimbles</strong></span>
+              <span>First Pulled: <strong class="text-emerald-400">${new Date(ownedEntry.firstPulledAt).toLocaleDateString()}</strong></span>
+            </div>
+            <button
+              type="button"
+              onclick="showOffOwnedCardFromModal('${card.id}')"
+              style="border:none;"
+              class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-twitch-purple to-pink-600 text-white text-xs font-extrabold shadow-lg transition"
+            >
+              📡 Show Off on Stream Overlay
+            </button>
+          `
+          : `
+            <div class="w-56 sm:w-64 aspect-[3/4] rounded-2xl border-2 border-gray-800 bg-twitch-dark p-4 flex flex-col justify-between relative overflow-hidden shadow-2xl mb-4">
+              <div class="flex items-center justify-between z-20">
+                <span class="text-xs font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${style.badge}">${card.rarity}</span>
+                <span class="text-xs font-bold text-gray-500">Locked</span>
+              </div>
+              <div class="my-3 flex-1 rounded-xl bg-black/50 border border-gray-800 flex flex-col items-center justify-center text-center p-4 z-20">
+                <span class="text-4xl mb-2">🔒</span>
+                <span class="text-xs font-bold text-gray-400">Image Hidden Until Collected</span>
+                <span class="text-[10px] text-gray-600 mt-1">Pull from packs or unlock with Chimbles</span>
+              </div>
+              <div class="z-20">
+                <h4 style="margin:0;" class="font-display font-black text-base text-gray-300 leading-snug">${escapeHTML(card.name)}</h4>
+                <p style="margin:0.25rem 0 0;" class="text-xs text-gray-500 italic">Lore hidden until card is discovered.</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onclick="purchaseUncollectedCard('${card.id}'); closeCardDetailModal();"
+              style="${canAfford ? 'border:none;' : ''}"
+              class="w-full py-2.5 px-4 rounded-xl text-xs font-extrabold transition ${
+                canAfford
+                  ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-twitch-dark shadow-lg'
+                  : 'bg-twitch-dark border border-twitch-border text-gray-400'
+              }"
+            >
+              💎 Unlock Card for ${craftCost} Chimbles (You have ${user.chimbles || 0})
+            </button>
+          `;
+
+        document.getElementById('card-detail-modal').classList.remove('hidden');
+      }
+
+      function closeCardDetailModal(event) {
+        if (!event || event.target.id === 'card-detail-modal') {
+          document.getElementById('card-detail-modal').classList.add('hidden');
+        }
+      }
+
+      // =========================================================================
+      // 8. BROADCASTER DASHBOARD & CRUD
+      // =========================================================================
+      function renderBroadcasterDashboard() {
+        syncActiveCollectionRef();
+        const activeSet = getActiveCardset();
+
+        const setSelect = document.getElementById('cfg-active-set-select');
+        if (setSelect) {
+          setSelect.innerHTML = state.cardsets.map(s => `
+            <option value="${escapeHTML(s.id)}" class="bg-twitch-panel" ${s.id === state.activeSetId ? 'selected' : ''}>
+              ${escapeHTML(s.badgeEmoji || '🃏')} ${escapeHTML(s.name)} (${s.cards.length} cards)${s.pullable === false ? ' [Vaulted]' : ''}
+            </option>
+          `).join('');
+        }
+        const delSetBtn = document.getElementById('btn-delete-cardset');
+        if (delSetBtn) delSetBtn.disabled = state.cardsets.length <= 1;
+
+        if (activeSet) {
+          document.getElementById('cfg-set-name').value = activeSet.name || '';
+          document.getElementById('cfg-set-badge-name').value = activeSet.badgeName || '';
+          document.getElementById('cfg-set-badge-emoji').value = activeSet.badgeEmoji || '🏆';
+          document.getElementById('cfg-set-pullable').checked = activeSet.pullable !== false;
+        }
+
+        document.getElementById('cfg-deck-title').value = state.settings.deckTitle;
+        document.getElementById('cfg-cost-1').value = state.settings.cost1Card || 2000;
+        document.getElementById('cfg-cost-3').value = state.settings.cost3Cards || 4000;
+
+        const giftCardSelect = document.getElementById('gift-specific-card-select');
+        if (giftCardSelect) {
+          giftCardSelect.innerHTML = state.cardsets.flatMap(set =>
+            set.cards.map(card => `<option value="${escapeHTML(card.id)}" class="bg-twitch-panel">[${escapeHTML(set.name)}] ${escapeHTML(card.name)} (${card.rarity})</option>`)
+          ).join('');
+        }
+
+        renderPendingGiftsQueue();
+
+        const totalWeight = state.collection.reduce((sum, c) => sum + getRarityPullWeight(c.rarity), 0);
+        const list = document.getElementById('broadcaster-card-list');
+
+        if (state.collection.length === 0) {
+          list.innerHTML = `<div class="col-span-full py-12 text-center text-gray-500 border border-dashed border-twitch-border rounded-2xl"><p class="text-sm font-semibold">Your collection pool is empty.</p></div>`;
+        } else {
+          list.innerHTML = state.collection.map(card => {
+            const style = RARITY_STYLES[card.rarity] || RARITY_STYLES.Common;
+            const odds = totalWeight > 0 ? ((getRarityPullWeight(card.rarity) / totalWeight) * 100).toFixed(1) : 0;
+
+            return `
+              <div class="bg-twitch-dark border border-twitch-border rounded-2xl p-3 flex flex-col justify-between transition">
+                <div>
+                  <div class="flex items-center justify-between gap-1 mb-2">
+                    <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${style.badge}">${card.rarity}</span>
+                    <span class="text-[11px] font-mono text-gray-400">Odds: ${odds}%</span>
+                  </div>
+                  <div class="h-28 rounded-xl bg-gradient-to-b ${style.gradient} border border-white/10 flex items-center justify-center overflow-hidden mb-2.5 relative">
+                    ${renderCardArtwork(card, 'text-4xl')}
+                  </div>
+                  <h4 style="margin:0;" class="font-bold text-sm text-white truncate">${escapeHTML(card.name)}</h4>
+                  <p style="margin:0.15rem 0 0;" class="text-[11px] text-gray-400 line-clamp-2 min-h-[2rem]">${escapeHTML(card.description || 'No description.')}</p>
+                </div>
+
+                <div class="flex items-center gap-2 mt-3 pt-2.5 border-t border-twitch-border">
+                  <button onclick="editCard('${card.id}')" class="flex-1 py-1.5 rounded-lg bg-twitch-elevated border border-twitch-border text-xs font-semibold text-gray-200">
+                    ✏️ Edit
+                  </button>
+                  <button onclick="deleteCard('${card.id}')" class="py-1.5 px-2.5 rounded-lg bg-rose-950/40 border border-rose-800/50 text-xs text-rose-300">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        updateLiveFormPreview();
+        updateStorageMeter();
+      }
+
+      function toggleGiftSpecificCardSelect() {
+        const mode = document.getElementById('gift-pull-mode').value;
+        document.getElementById('gift-pack-qty-wrapper').classList.toggle('hidden', mode === 'guaranteed');
+        document.getElementById('gift-specific-card-wrapper').classList.toggle('hidden', mode !== 'guaranteed');
+      }
+
+      function dispatchGiftToUser(recipient, mode, qty, cardId, note) {
+        const cleanRecipient = recipient.trim();
+        if (!cleanRecipient) return null;
+        ensureUserProfile(cleanRecipient);
+        const targetUser = state.users[cleanRecipient];
+
+        if (mode === 'guaranteed') {
+          let cardObj = null;
+          for (const set of state.cardsets) {
+            const found = set.cards.find(c => c.id === cardId);
+            if (found) { cardObj = found; break; }
+          }
+          if (!cardObj) return null;
+          targetUser.giftedPacks.push({
+            id: 'gift_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+            type: 'guaranteed',
+            cardId: cardObj.id,
+            cardName: cardObj.name,
+            note: note || `Streamer gifted you: ${cardObj.name}!`,
+            giftedAt: Date.now()
+          });
+        } else {
+          const count = Math.max(1, Math.min(20, parseInt(qty, 10) || 1));
+          for (let i = 0; i < count; i++) {
+            targetUser.giftedPacks.push({
+              id: 'gift_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 6),
+              type: 'pack',
+              note: note || 'Streamer gifted you a Booster Pack!',
+              giftedAt: Date.now()
+            });
+          }
+        }
+
+        saveState();
+        populateUserDropdown();
+        renderPendingGiftsQueue();
+        updateViewerHeaderUI();
+        return cleanRecipient;
+      }
+
+      function giftPullsToViewer(event) {
+        event.preventDefault();
+        const sentTo = dispatchGiftToUser(
+          document.getElementById('gift-recipient-input').value,
+          document.getElementById('gift-pull-mode').value,
+          document.getElementById('gift-pack-qty').value,
+          document.getElementById('gift-specific-card-select').value,
+          document.getElementById('gift-note-input').value.trim()
+        );
+        if (!sentTo) return;
+        showToast(`Sent gift to ${sentTo}!`, 'success');
+        document.getElementById('gift-note-input').value = '';
+      }
+
+      function giftAndPreviewAsViewer() {
+        const recipient = document.getElementById('gift-recipient-input').value || state.activeUser;
+        const sentTo = dispatchGiftToUser(
+          recipient,
+          document.getElementById('gift-pull-mode').value,
+          document.getElementById('gift-pack-qty').value,
+          document.getElementById('gift-specific-card-select').value,
+          document.getElementById('gift-note-input').value.trim()
+        );
+        if (!sentTo) return;
+        switchSimulatedUser(sentTo);
+        switchRole('viewer');
+        openPack('gift');
+      }
+
+      function revokeUserGift(username, giftId) {
+        const user = state.users[username];
+        if (!user) return;
+        user.giftedPacks = user.giftedPacks.filter(g => g.id !== giftId);
+        saveState();
+        populateUserDropdown();
+        renderPendingGiftsQueue();
+        updateViewerHeaderUI();
+      }
+
+      function renderPendingGiftsQueue() {
+        const listEl = document.getElementById('pending-gifts-list');
+        const totalEl = document.getElementById('pending-gifts-total');
+        if (!listEl || !totalEl) return;
+
+        const allPending = [];
+        Object.entries(state.users).forEach(([username, profile]) => {
+          (profile.giftedPacks || []).forEach(g => allPending.push({ username, ...g }));
+        });
+
+        totalEl.textContent = `${allPending.length} pending`;
+        if (allPending.length === 0) {
+          listEl.innerHTML = `<div class="text-gray-500 italic">No unclaimed gifts right now.</div>`;
+          return;
+        }
+
+        listEl.innerHTML = allPending.map(item => `
+          <div class="flex items-center justify-between gap-2 bg-twitch-dark border border-twitch-border rounded-lg px-2.5 py-1.5">
+            <div class="truncate">
+              <span class="font-bold text-amber-300">${escapeHTML(item.username)}</span>
+              <span class="text-gray-400"> • ${item.type === 'guaranteed' ? `Card: ${escapeHTML(item.cardName)}` : 'Random Booster Pack'}</span>
+            </div>
+            <button type="button" onclick="revokeUserGift('${escapeHTML(item.username)}', '${item.id}')" style="background:transparent;border:none;" class="text-gray-500 hover:text-rose-400">✕</button>
+          </div>
+        `).join('');
+      }
+
+      function saveChannelSettings() {
+        state.settings.deckTitle = document.getElementById('cfg-deck-title').value.trim() || "Creator's Official Deck";
+        state.settings.cost1Card = Math.max(100, parseInt(document.getElementById('cfg-cost-1').value, 10) || 2000);
+        state.settings.cost3Cards = Math.max(100, parseInt(document.getElementById('cfg-cost-3').value, 10) || 4000);
+        saveState();
+        updateViewerHeaderUI();
+        showToast('Channel settings saved!', 'info');
+      }
+
+      function switchActiveCardset(setId) {
+        if (!state.cardsets.some(s => s.id === setId)) return;
+        state.activeSetId = setId;
+        state.binderPage = 1;
+        syncActiveCollectionRef();
+        saveState();
+        updateViewerHeaderUI();
+        renderBinder();
+        if (state.role === 'broadcaster') renderBroadcasterDashboard();
+        if (state.role === 'twitch-preview') renderTwitchStreamPreview();
+      }
+
+      function selectViewerCardset(setId) {
+        switchActiveCardset(setId);
+      }
+
+      function createNewCardset() {
+        const nextNum = state.cardsets.length + 1;
+        const newSet = {
+          id: 'set_' + Date.now(),
+          name: `Series ${nextNum}: Expansion`,
+          badgeName: `Series ${nextNum} Master`,
+          badgeEmoji: '🌟',
+          pullable: true,
+          cards: []
+        };
+        state.cardsets.push(newSet);
+        state.activeSetId = newSet.id;
+        state.binderPage = 1;
+        syncActiveCollectionRef();
+        saveState();
+        updateViewerHeaderUI();
+        renderBinder();
+        renderBroadcasterDashboard();
+        showToast(`Created "${newSet.name}"!`, 'success');
+      }
+
+      function saveActiveCardsetDetails() {
+        const activeSet = getActiveCardset();
+        if (!activeSet) return;
+        activeSet.name = document.getElementById('cfg-set-name').value.trim() || 'Untitled Cardset';
+        activeSet.badgeName = document.getElementById('cfg-set-badge-name').value.trim() || 'Set Master';
+        activeSet.badgeEmoji = document.getElementById('cfg-set-badge-emoji').value.trim() || '🏆';
+        activeSet.pullable = document.getElementById('cfg-set-pullable').checked;
+        saveState();
+        updateViewerHeaderUI();
+        renderBinder();
+        renderBroadcasterDashboard();
+        showToast('Cardset updated!', 'info');
+      }
+
+      function deleteCurrentCardset() {
+        if (state.cardsets.length <= 1) return;
+        const activeSet = getActiveCardset();
+        state.cardsets = state.cardsets.filter(s => s.id !== activeSet.id);
+        state.activeSetId = state.cardsets[0].id;
+        state.binderPage = 1;
+        syncActiveCollectionRef();
+        saveState();
+        updateViewerHeaderUI();
+        renderBinder();
+        renderBroadcasterDashboard();
+      }
+
+      function saveCardFromForm(event) {
+        event.preventDefault();
+        const editId = document.getElementById('edit-card-id').value;
+        const name = document.getElementById('card-name').value.trim();
+        const rarity = document.getElementById('card-rarity').value;
+        const emoji = document.getElementById('card-emoji').value.trim() || '✨';
+        const imageUrl = document.getElementById('card-image-url').value.trim();
+        const description = document.getElementById('card-desc').value.trim();
+        if (!name) return;
+
+        if (editId) {
+          const idx = state.collection.findIndex(c => c.id === editId);
+          if (idx !== -1) state.collection[idx] = { ...state.collection[idx], name, rarity, emoji, imageUrl, description };
+        } else {
+          state.collection.push({ id: 'card_' + Date.now(), name, rarity, emoji, imageUrl, description });
+        }
+
+        if (saveState()) {
+          resetCardForm();
+          renderBroadcasterDashboard();
+          renderBinder();
+        }
+      }
+
+      function editCard(cardId) {
+        const card = state.collection.find(c => c.id === cardId);
+        if (!card) return;
+        document.getElementById('edit-card-id').value = card.id;
+        document.getElementById('card-name').value = card.name;
+        document.getElementById('card-rarity').value = card.rarity;
+        document.getElementById('card-emoji').value = card.emoji || '✨';
+        document.getElementById('card-image-url').value = card.imageUrl || '';
+        document.getElementById('card-desc').value = card.description || '';
+        document.getElementById('btn-clear-single-img').classList.toggle('hidden', !card.imageUrl);
+        document.getElementById('card-form-heading').textContent = `✏️ Editing: ${card.name}`;
+        document.getElementById('btn-save-card-label').textContent = 'Update Card';
+        document.getElementById('btn-cancel-edit').classList.remove('hidden');
+        updateLiveFormPreview();
+      }
+
+      function resetCardForm() {
+        document.getElementById('card-creator-form').reset();
+        document.getElementById('edit-card-id').value = '';
+        document.getElementById('card-emoji').value = '🔥';
+        document.getElementById('btn-clear-single-img').classList.add('hidden');
+        document.getElementById('card-form-heading').textContent = '➕ Add New Custom Card';
+        document.getElementById('btn-save-card-label').textContent = 'Add Card to Collection Pool';
+        document.getElementById('btn-cancel-edit').classList.add('hidden');
+        updateLiveFormPreview();
+      }
+
+      function deleteCard(cardId) {
+        state.collection = state.collection.filter(c => c.id !== cardId);
+        saveState();
+        renderBroadcasterDashboard();
+        renderBinder();
+      }
+
+      function updateLiveFormPreview() {
+        const name = document.getElementById('card-name').value.trim() || 'Card Preview';
+        const rarity = document.getElementById('card-rarity').value;
+        const emoji = document.getElementById('card-emoji').value.trim() || '🔥';
+        const imageUrl = document.getElementById('card-image-url').value.trim();
+        const style = RARITY_STYLES[rarity] || RARITY_STYLES.Common;
+
+        const clearBtn = document.getElementById('btn-clear-single-img');
+        if (clearBtn) clearBtn.classList.toggle('hidden', !imageUrl);
+
+        const editId = document.getElementById('edit-card-id').value;
+        const otherWeight = state.collection
+          .filter(c => c.id !== editId)
+          .reduce((sum, c) => sum + getRarityPullWeight(c.rarity), 0);
+        const currentWeight = getRarityPullWeight(rarity);
+        const estOdds = ((currentWeight / (otherWeight + currentWeight)) * 100).toFixed(1);
+        document.getElementById('form-odds-preview').textContent = `Estimated Pull Odds: ${estOdds}% (${rarity} tier)`;
+
+        const mockCard = { name, rarity, emoji, imageUrl };
+        document.getElementById('form-live-preview').innerHTML = `
+          <div class="aspect-[3/4] rounded-xl border-2 rarity-${rarity} bg-gradient-to-b ${style.gradient} p-2 flex flex-col justify-between relative overflow-hidden">
+            ${rarity === 'Holographic' || rarity === 'Legendary' ? '<div class="holo-foil absolute inset-0 pointer-events-none"></div>' : ''}
+            <span class="text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded border self-start ${style.badge} z-10">${rarity}</span>
+            <div class="my-1 flex-1 rounded bg-black/40 flex items-center justify-center overflow-hidden z-10">
+              ${renderCardArtwork(mockCard, 'text-2xl')}
+            </div>
+            <div class="font-bold text-[10px] text-white truncate z-10">${escapeHTML(name)}</div>
+          </div>
+        `;
+      }
+
+      // =========================================================================
+      // 9. LOCAL IMAGE OPTIMIZATION & BATCH STUDIO
+      // =========================================================================
+      function compressImageFile(file, maxDimension = 450, quality = 0.82) {
+        return new Promise((resolve, reject) => {
+          if (!file.type.startsWith('image/')) { reject(new Error('Not an image')); return; }
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+              let width = img.width;
+              let height = img.height;
+              if (width > maxDimension || height > maxDimension) {
+                if (width > height) { height = Math.round((height * maxDimension) / width); width = maxDimension; }
+                else { width = Math.round((width * maxDimension) / height); height = maxDimension; }
+              }
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+              canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+              resolve(canvas.toDataURL(file.type === 'image/png' ? 'image/webp' : 'image/jpeg', quality));
+            };
+            img.onerror = () => reject(new Error('Failed'));
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function formatFilenameToCardTitle(filename) {
+        const cleaned = filename.replace(/\.[^/.]+$/, '').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+        return cleaned ? cleaned.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Custom Card';
+      }
+
+      async function handleSingleCardImageUpload(event) {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        try {
+          const optimizedDataUrl = await compressImageFile(file, 450, 0.84);
+          document.getElementById('card-image-url').value = optimizedDataUrl;
+          const nameInput = document.getElementById('card-name');
+          if (!nameInput.value.trim()) nameInput.value = formatFilenameToCardTitle(file.name);
+          updateLiveFormPreview();
+        } catch (err) {}
+        event.target.value = '';
+      }
+
+      function clearSingleCardImage() {
+        document.getElementById('card-image-url').value = '';
+        updateLiveFormPreview();
+      }
+
+      function triggerBatchFilePicker() { document.getElementById('batch-image-input').click(); }
+      function handleBatchDragOver(e) { e.preventDefault(); document.getElementById('batch-dropzone').classList.add('dropzone-active'); }
+      function handleBatchDragLeave(e) { e.preventDefault(); document.getElementById('batch-dropzone').classList.remove('dropzone-active'); }
+      function handleBatchDrop(e) {
+        e.preventDefault();
+        document.getElementById('batch-dropzone').classList.remove('dropzone-active');
+        if (e.dataTransfer?.files?.length) handleBatchImageFiles(e.dataTransfer.files);
+      }
+
+      async function handleBatchImageFiles(fileList) {
+        const files = Array.from(fileList || []).filter(f => f.type.startsWith('image/'));
+        if (files.length === 0) return;
+        const newStagedItems = [];
+        for (let i = 0; i < files.length; i++) {
+          try {
+            const optimizedUrl = await compressImageFile(files[i], 450, 0.82);
+            newStagedItems.push({
+              tempId: 'stage_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 6),
+              name: formatFilenameToCardTitle(files[i].name),
+              rarity: 'Common',
+              emoji: '✨',
+              imageUrl: optimizedUrl,
+              description: ''
+            });
+          } catch (err) {}
+        }
+        if (newStagedItems.length > 0) {
+          state.stagedBatchCards = [...state.stagedBatchCards, ...newStagedItems];
+          renderBatchStagingGrid();
+          document.getElementById('batch-upload-modal').classList.remove('hidden');
+        }
+      }
+
+      function closeBatchModal() { document.getElementById('batch-upload-modal').classList.add('hidden'); }
+      function clearBatchStaging() { state.stagedBatchCards = []; closeBatchModal(); }
+      function removeStagedCard(tempId) {
+        state.stagedBatchCards = state.stagedBatchCards.filter(item => item.tempId !== tempId);
+        if (state.stagedBatchCards.length === 0) closeBatchModal();
+        else renderBatchStagingGrid();
+      }
+      function updateStagedCardField(tempId, field, value) {
+        const target = state.stagedBatchCards.find(item => item.tempId === tempId);
+        if (!target) return;
+        target[field] = value;
+        if (field === 'rarity') renderBatchStagingGrid();
+      }
+      function applyBulkRarity(rarity) {
+        if (!rarity) return;
+        state.stagedBatchCards.forEach(item => { item.rarity = rarity; });
+        document.getElementById('bulk-rarity-select').value = '';
+        renderBatchStagingGrid();
+      }
+
+      function renderBatchStagingGrid() {
+        const count = state.stagedBatchCards.length;
+        document.getElementById('batch-count-badge').textContent = count;
+        document.getElementById('batch-commit-count').textContent = count;
+        document.getElementById('batch-staging-grid').innerHTML = state.stagedBatchCards.map((item, idx) => {
+          const style = RARITY_STYLES[item.rarity] || RARITY_STYLES.Common;
+          return `
+            <div class="bg-twitch-dark border border-twitch-border rounded-2xl p-3.5 flex flex-col gap-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold text-gray-400">Card #${idx + 1}</span>
+                <button type="button" onclick="removeStagedCard('${item.tempId}')" style="background:transparent;border:none;" class="text-gray-500 hover:text-rose-400 text-xs">🗑️</button>
+              </div>
+              <div class="h-36 rounded-xl border-2 rarity-${item.rarity} bg-gradient-to-b ${style.gradient} p-2 flex items-center justify-center relative overflow-hidden">
+                <img src="${item.imageUrl}" alt="${escapeHTML(item.name)}" class="w-full h-full object-cover rounded-lg" />
+              </div>
+              <input type="text" value="${escapeHTML(item.name)}" oninput="updateStagedCardField('${item.tempId}', 'name', this.value)" class="w-full px-2.5 py-1.5 text-xs" />
+              <select onchange="updateStagedCardField('${item.tempId}', 'rarity', this.value)" class="w-full px-2 py-1.5 text-xs">
+                <option value="Common" ${item.rarity === 'Common' ? 'selected' : ''}>Common</option>
+                <option value="Rare" ${item.rarity === 'Rare' ? 'selected' : ''}>Rare</option>
+                <option value="Epic" ${item.rarity === 'Epic' ? 'selected' : ''}>Epic</option>
+                <option value="Legendary" ${item.rarity === 'Legendary' ? 'selected' : ''}>Legendary</option>
+                <option value="Holographic" ${item.rarity === 'Holographic' ? 'selected' : ''}>Holographic</option>
+              </select>
+            </div>
+          `;
+        }).join('');
+      }
+
+      function commitBatchCards() {
+        if (state.stagedBatchCards.length === 0) return;
+        const createdCards = state.stagedBatchCards.map((item, index) => ({
+          id: 'card_' + Date.now() + '_' + index + '_' + Math.random().toString(36).slice(2, 6),
+          name: item.name.trim() || `Custom Card #${index + 1}`,
+          rarity: item.rarity,
+          emoji: item.emoji || '✨',
+          imageUrl: item.imageUrl,
+          description: item.description.trim()
+        }));
+        state.collection.push(...createdCards);
+        if (saveState()) {
+          state.stagedBatchCards = [];
+          closeBatchModal();
+          renderBroadcasterDashboard();
+          renderBinder();
+          showToast(`Added ${createdCards.length} new cards!`, 'success');
+        }
+      }
+
+      function exportCollectionJSON() {
+        const blob = new Blob([JSON.stringify({ settings: state.settings, cardsets: state.cardsets }, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'thechimmytcg-collection.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function importCollectionJSON(event) {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const parsed = JSON.parse(e.target.result);
+            if (Array.isArray(parsed.cardsets) && parsed.cardsets.length > 0) {
+              state.cardsets = parsed.cardsets;
+              state.activeSetId = state.cardsets[0].id;
+              syncActiveCollectionRef();
+            }
+            if (parsed.settings) state.settings = { ...state.settings, ...parsed.settings };
+            saveState();
+            updateViewerHeaderUI();
+            renderBroadcasterDashboard();
+            renderBinder();
+          } catch (err) {}
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+      }
+
+      function resetToDefaultDeck() {
+        state.cardsets = [{
+          id: 'set_series_1',
+          name: 'Series 1: Stream Legends',
+          badgeName: 'Series 1 Champion',
+          badgeEmoji: '🏆',
+          pullable: true,
+          cards: JSON.parse(JSON.stringify(DEFAULT_CARDS))
+        }];
+        state.activeSetId = 'set_series_1';
+        syncActiveCollectionRef();
+        saveState();
+        updateViewerHeaderUI();
+        renderBroadcasterDashboard();
+        renderBinder();
+      }
+
+      // =========================================================================
+      // 10. UI NAVIGATION & UTILITIES
+      // =========================================================================
+      function switchRole(role) {
+        state.role = role;
+        const viewerView = document.getElementById('view-viewer');
+        const twitchPreviewView = document.getElementById('view-twitch-preview');
+        const broadcasterView = document.getElementById('view-broadcaster');
+        const tabViewer = document.getElementById('tab-viewer');
+        const tabTwitchPreview = document.getElementById('tab-twitch-preview');
+        const tabBroadcaster = document.getElementById('tab-broadcaster');
+
+        const activeTabClass = 'px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 bg-twitch-purple text-white shadow';
+        const inactiveTabClass = 'px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 text-gray-400 hover:text-white';
+
+        viewerView.classList.add('hidden');
+        twitchPreviewView.classList.add('hidden');
+        broadcasterView.classList.add('hidden');
+
+        [tabViewer, tabTwitchPreview, tabBroadcaster].forEach(t => {
+          t.className = inactiveTabClass;
+          t.style.background = 'transparent';
+          t.style.border = 'none';
+        });
+
+        if (role === 'viewer') {
+          viewerView.classList.remove('hidden');
+          tabViewer.className = activeTabClass;
+          tabViewer.style.background = '#9146FF';
+          updateViewerHeaderUI();
+          renderBinder();
+        } else if (role === 'twitch-preview') {
+          twitchPreviewView.classList.remove('hidden');
+          tabTwitchPreview.className = activeTabClass;
+          tabTwitchPreview.style.background = '#9146FF';
+          renderTwitchStreamPreview();
+        } else {
+          broadcasterView.classList.remove('hidden');
+          tabBroadcaster.className = activeTabClass;
+          tabBroadcaster.style.background = '#9146FF';
+          renderBroadcasterDashboard();
+        }
+      }
+
+      function renderTwitchStreamPreview() {
+        syncActiveCollectionRef();
+        const user = state.users[state.activeUser];
+        const activeSet = getActiveCardset();
+        const totalCards = state.collection.length;
+        const ownedCount = state.collection.filter(c => user.binder[c.id]?.count > 0).length;
+
+        document.getElementById('preview-viewer-name').textContent = state.activeUser;
+        document.getElementById('panel-points-val').textContent = user.points.toLocaleString();
+        document.getElementById('panel-chimbles-val').textContent = (user.chimbles || 0).toLocaleString();
+        document.getElementById('panel-set-progress').textContent = `${ownedCount}/${totalCards}`;
+        document.getElementById('overlay-completion-text').textContent = `${ownedCount} / ${totalCards} Cards Collected`;
+        if (activeSet) document.getElementById('overlay-set-name').textContent = `${activeSet.name} Progress`;
+
+        const setOptionsHtml = state.cardsets.map(s => `
+          <option value="${escapeHTML(s.id)}" class="bg-twitch-panel" ${s.id === state.activeSetId ? 'selected' : ''}>
+            ${escapeHTML(s.badgeEmoji || '🃏')} ${escapeHTML(s.name)} (${s.cards.length})${s.pullable === false ? ' [Vaulted]' : ''}
+          </option>
+        `).join('');
+        document.getElementById('panel-cardset-select').innerHTML = setOptionsHtml;
+        document.getElementById('overlay-cardset-select').innerHTML = setOptionsHtml;
+
+        document.getElementById('panel-mini-binder-grid').innerHTML = state.collection.slice(0, 3).map(card => {
+          const isOwned = (user.binder[card.id]?.count || 0) > 0;
+          const style = RARITY_STYLES[card.rarity] || RARITY_STYLES.Common;
+          if (!isOwned) {
+            return `<div class="aspect-[3/4] rounded-lg border border-gray-800 bg-twitch-dark flex flex-col items-center justify-center p-1 text-center"><span class="text-xs mb-1">🔒</span><span class="text-[9px] text-gray-500 line-clamp-1">${escapeHTML(card.name)}</span></div>`;
+          }
+          return `<div onclick="openCardDetailModal('${card.id}')" class="aspect-[3/4] rounded-lg border rarity-${card.rarity} bg-gradient-to-b ${style.gradient} p-1.5 flex flex-col justify-between cursor-pointer overflow-hidden"><div class="flex-1 flex items-center justify-center overflow-hidden">${renderCardArtwork(card, 'text-2xl')}</div><div class="text-[9px] font-bold text-white truncate text-center mt-1">${escapeHTML(card.name)}</div></div>`;
+        }).join('');
+      }
+
+      function toggleVideoOverlayDrawer() {
+        document.getElementById('video-overlay-drawer').classList.toggle('hidden');
+      }
+
+      function quickPullFromTwitchPreview(cardCount = 1) {
+        openPack(cardCount === 3 ? 'points_3' : 'points_1');
+        renderTwitchStreamPreview();
+      }
+
+      function switchSimulatedUser(username) {
+        state.activeUser = username;
+        ensureUserProfile(username);
+        state.currentPulledCards = [];
+        state.binderPage = 1;
+        saveState();
+        updateViewerHeaderUI();
+        renderBinder();
+        if (state.role === 'twitch-preview') renderTwitchStreamPreview();
+      }
+
+      function addSimulatedUser() {
+        const newName = `TwitchFan_${Math.floor(100 + Math.random() * 900)}`;
+        ensureUserProfile(newName);
+        state.activeUser = newName;
+        saveState();
+        populateUserDropdown();
+        switchSimulatedUser(newName);
+      }
+
+      function updateViewerHeaderUI() {
+        syncActiveCollectionRef();
+        const user = state.users[state.activeUser];
+        const activeSet = getActiveCardset();
+        document.getElementById('channel-title-display').textContent = state.settings.deckTitle;
+        document.getElementById('active-viewer-badge').textContent = state.activeUser;
+        document.getElementById('viewer-points-display').textContent = user.points.toLocaleString();
+        document.getElementById('viewer-chimbles-display').textContent = (user.chimbles || 0).toLocaleString();
+
+        const viewerPackSetSelect = document.getElementById('viewer-pack-set-select');
+        if (viewerPackSetSelect) {
+          viewerPackSetSelect.innerHTML = state.cardsets.map(s => `
+            <option value="${escapeHTML(s.id)}" class="bg-twitch-panel" ${s.id === state.activeSetId ? 'selected' : ''}>
+              ${escapeHTML(s.badgeEmoji || '🃏')} ${escapeHTML(s.name)} (${s.cards.length} cards)${s.pullable === false ? ' — Vaulted' : ''}
+            </option>
+          `).join('');
+        }
+
+        const activeSetPillEl = document.getElementById('active-set-pill-label');
+        if (activeSetPillEl && activeSet) activeSetPillEl.textContent = activeSet.name;
+        const btnPull1Span = document.querySelector('#btn-pull-1 div:last-child span');
+        if (btnPull1Span) btnPull1Span.textContent = `🪙 ${(Number(state.settings.cost1Card) || 2000).toLocaleString()} Pts`;
+        const btnPull3Span = document.querySelector('#btn-pull-3 div:last-child span');
+        if (btnPull3Span) btnPull3Span.textContent = `🪙 ${(Number(state.settings.cost3Cards) || 4000).toLocaleString()} Pts`;
+
+        const isVaulted = activeSet && activeSet.pullable === false;
+        document.getElementById('vaulted-set-banner').classList.toggle('hidden', !isVaulted);
+        const pullBtnsWrap = document.getElementById('channel-point-pull-buttons');
+        pullBtnsWrap.classList.toggle('opacity-40', isVaulted);
+        pullBtnsWrap.classList.toggle('pointer-events-none', isVaulted);
+
+        const giftBanner = document.getElementById('gifted-packs-banner');
+        const gifts = user.giftedPacks || [];
+        if (gifts.length > 0) {
+          giftBanner.classList.remove('hidden');
+          document.getElementById('gifted-pack-count').textContent = `${gifts.length} Gift${gifts.length > 1 ? 's' : ''}`;
+          document.getElementById('gifted-pack-note').textContent = gifts[0].note || 'A booster pack was gifted to you!';
+        } else {
+          giftBanner.classList.add('hidden');
+        }
+      }
+
+      function renderCardArtwork(card, emojiSizeClass = 'text-5xl') {
+        if (card.imageUrl) {
+          return `<img src="${escapeHTML(card.imageUrl)}" alt="${escapeHTML(card.name)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" class="w-full h-full object-cover" /><div style="display:none;" class="w-full h-full items-center justify-center ${emojiSizeClass}">${escapeHTML(card.emoji || '✨')}</div>`;
+        }
+        return `<span class="${emojiSizeClass} select-none">${escapeHTML(card.emoji || '✨')}</span>`;
+      }
+
+      function toggleSound() {
+        state.soundEnabled = !state.soundEnabled;
+        document.getElementById('sound-icon').textContent = state.soundEnabled ? '🔊' : '🔇';
+      }
+
+      function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const colors = {
+          success: 'border-emerald-500/60 bg-emerald-950/90 text-emerald-100',
+          error: 'border-rose-500/60 bg-rose-950/90 text-rose-100',
+          warning: 'border-amber-500/60 bg-amber-950/90 text-amber-100',
+          info: 'border-twitch-purple/60 bg-twitch-panel/95 text-gray-100'
+        };
+        const toast = document.createElement('div');
+        toast.className = `pointer-events-auto border ${colors[type] || colors.info} backdrop-blur-md px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs sm:text-sm font-semibold animate-pop-in`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3200);
+      }
+
+      function escapeHTML(str) {
+        if (typeof str !== 'string') return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      }
+
+      // =========================================================================
+      // 11. TWITCH EXTENSION SDK LIFECYCLE HOOKS
+      // =========================================================================
+      function initTwitchExtensionSDK() {
+        if (!window.Twitch || !window.Twitch.ext) return;
+
+        // Automatically switch to Broadcaster Config when opened in Twitch's Config page
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('state') === 'config' || params.get('mode') === 'config') {
+          switchRole('broadcaster');
+        }
+
+        window.Twitch.ext.onAuthorized(async (auth) => {
+          twitchJwtToken = auth.token;
+          twitchChannelId = auth.channelId;
+
+          // Hide sandbox-only user switcher when live inside Twitch
+          const sandboxUser = document.getElementById('sandbox-user-switcher');
+          if (sandboxUser) sandboxUser.classList.add('hidden');
+
+          // If EBS_BASE_URL is configured, sync real viewer binder & Chimbles from server
+          if (EBS_BASE_URL) {
+            try {
+              const res = await fetch(`${EBS_BASE_URL}/api/viewer/state`, {
+                headers: { 'Authorization': `Bearer ${twitchJwtToken}` }
+              });
+              if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data.cardsets) && data.cardsets.length > 0) {
+                  state.cardsets = data.cardsets;
+                  state.activeSetId = state.cardsets[0].id;
+                  syncActiveCollectionRef();
+                }
+                if (data.profile) {
+                  const uid = data.profile.userId || auth.userId;
+                  state.activeUser = uid;
+                  ensureUserProfile(uid);
+                  state.users[uid].chimbles = data.profile.chimbles || 0;
+                  state.users[uid].binder = data.profile.binder || {};
+                  state.users[uid].earnedBadges = data.profile.earnedBadges || [];
+                }
+                updateViewerHeaderUI();
+                renderBinder();
+              }
+            } catch (err) {}
+          }
+        });
+      }
+
+      // =========================================================================
+      // 12. EXPOSE HANDLERS & BOOTSTRAP
+      // =========================================================================
+      window.switchRole = switchRole;
+      window.switchSimulatedUser = switchSimulatedUser;
+      window.addSimulatedUser = addSimulatedUser;
+      window.toggleSound = toggleSound;
+      window.openPack = openPack;
+      window.flipPulledCard = flipPulledCard;
+      window.revealAllSuspenseCards = revealAllSuspenseCards;
+      window.closeSuspenseOverlay = closeSuspenseOverlay;
+      window.showOffPulledCardsOnStream = showOffPulledCardsOnStream;
+      window.showOffOwnedCardFromModal = showOffOwnedCardFromModal;
+      window.simulateSimultaneousShowOffs = simulateSimultaneousShowOffs;
+      window.purchaseUncollectedCard = purchaseUncollectedCard;
+      window.grantTestChannelPoints = grantTestChannelPoints;
+      window.switchActiveCardset = switchActiveCardset;
+      window.selectViewerCardset = selectViewerCardset;
+      window.createNewCardset = createNewCardset;
+      window.saveActiveCardsetDetails = saveActiveCardsetDetails;
+      window.deleteCurrentCardset = deleteCurrentCardset;
+      window.setBinderFilter = setBinderFilter;
+      window.changeBinderPage = changeBinderPage;
+      window.openCardDetailModal = openCardDetailModal;
+      window.closeCardDetailModal = closeCardDetailModal;
+      window.saveChannelSettings = saveChannelSettings;
+      window.saveCardFromForm = saveCardFromForm;
+      window.editCard = editCard;
+      window.resetCardForm = resetCardForm;
+      window.deleteCard = deleteCard;
+      window.updateLiveFormPreview = updateLiveFormPreview;
+      window.handleSingleCardImageUpload = handleSingleCardImageUpload;
+      window.clearSingleCardImage = clearSingleCardImage;
+      window.triggerBatchFilePicker = triggerBatchFilePicker;
+      window.handleBatchDragOver = handleBatchDragOver;
+      window.handleBatchDragLeave = handleBatchDragLeave;
+      window.handleBatchDrop = handleBatchDrop;
+      window.handleBatchImageFiles = handleBatchImageFiles;
+      window.closeBatchModal = closeBatchModal;
+      window.clearBatchStaging = clearBatchStaging;
+      window.removeStagedCard = removeStagedCard;
+      window.updateStagedCardField = updateStagedCardField;
+      window.applyBulkRarity = applyBulkRarity;
+      window.commitBatchCards = commitBatchCards;
+      window.exportCollectionJSON = exportCollectionJSON;
+      window.importCollectionJSON = importCollectionJSON;
+      window.resetToDefaultDeck = resetToDefaultDeck;
+      window.toggleVideoOverlayDrawer = toggleVideoOverlayDrawer;
+      window.quickPullFromTwitchPreview = quickPullFromTwitchPreview;
+      window.toggleGiftSpecificCardSelect = toggleGiftSpecificCardSelect;
+      window.giftPullsToViewer = giftPullsToViewer;
+      window.giftAndPreviewAsViewer = giftAndPreviewAsViewer;
+      window.revokeUserGift = revokeUserGift;
+
+      function initApp() {
+        loadState();
+        updateViewerHeaderUI();
+        renderBinder();
+        updateLiveFormPreview();
+        initTwitchExtensionSDK();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
+      } else {
+        initApp();
+      }
+    })();
+  </script>
+</body>
+</html>
