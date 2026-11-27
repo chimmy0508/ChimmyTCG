@@ -20,7 +20,7 @@ app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
 const PORT = process.env.PORT || 3001;
-const TWITCH_EXTENSION_SECRET = process.env.TWITCH_EXTENSION_SECRET || 'replace_with_base64_secret';
+const TWITCH_EXTENSION_SECRET = process.env.TWITCH_EXTENSION_SECRET || '7trjndRI++DeJBa4J+6BYFN+YJEcSk9T6o78HaeJZPc=';
 
 // ============================================================================
 // 1. IN-MEMORY STARTER STORE (Replace with PostgreSQL / Redis / DynamoDB in prod)
